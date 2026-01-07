@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+:root {
+  --color-bg: #ffffff;
+  --color-text: #1f2937;
+  --color-border: #e5e7eb;
+  --color-card: #f9fafb;
+}
+
+/* High contrast mode variables */
+.high-contrast {
+  --color-bg: #000000;
+  --color-text: #ffffff;
+  --color-border: #ffffff;
+  --color-card: #1a1a1a;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Presenter mode global styles */
+.presenter-mode {
+  font-size: 1.25rem;
+}
+
+.presenter-mode .card {
+  padding: 2rem;
+  border-radius: 1rem;
+}
+
+/* Fullscreen styles */
+.fullscreen-mode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  overflow-y: auto;
+  padding: 2rem;
+}
+
+/* Custom scrollbar for better UX */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-border);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Animation for strength bar */
+@keyframes pulse-strength {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-strength {
+  animation: pulse-strength 2s ease-in-out infinite;
+}
