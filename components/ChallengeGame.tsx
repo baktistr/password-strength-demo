@@ -1,24 +1,34 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { CHALLENGE_PASSWORDS } from '@/utils/constants';
+import { useState, useMemo, useCallback } from 'react';
+import { CHALLENGE_PASSWORDS_POOL } from '@/utils/constants';
 
 interface ChallengeGameProps {
   presenterMode: boolean;
   highContrast: boolean;
 }
 
-interface RankedPassword {
+interface ChallengePassword {
   password: string;
   score: number;
   explanation: string;
-  userRank: number | null;
+}
+
+interface RankedPassword extends ChallengePassword {
   actualRank: number;
 }
 
 /**
+ * Randomly select n items from an array
+ */
+function selectRandom<T>(array: T[], count: number): T[] {
+  const shuffled = [...array].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
+
+/**
  * Interactive challenge game where audience ranks passwords by strength.
- * Reveals actual rankings after voting.
+ * Randomly selects 4 passwords from a pool each round.
  */
 export default function ChallengeGame({
   presenterMode,
@@ -26,26 +36,28 @@ export default function ChallengeGame({
 }: ChallengeGameProps) {
   const [revealed, setRevealed] = useState(false);
   const [selectedRanks, setSelectedRanks] = useState<{ [key: number]: number }>({});
+  const [roundKey, setRoundKey] = useState(0); // Used to trigger new random selection
 
   const textClasses = highContrast ? 'text-white' : 'text-gray-900';
   const mutedClasses = highContrast ? 'text-gray-300' : 'text-gray-600';
 
-  // Sort passwords by actual score and assign ranks
+  // Randomly select 4 passwords and sort by score for ranking
   const rankedPasswords: RankedPassword[] = useMemo(() => {
-    const sorted = [...CHALLENGE_PASSWORDS].sort((a, b) => b.score - a.score);
+    const selected = selectRandom(CHALLENGE_PASSWORDS_POOL, 4);
+    const sorted = [...selected].sort((a, b) => b.score - a.score);
     return sorted.map((pw, index) => ({
       ...pw,
       actualRank: index + 1,
-      userRank: null,
     }));
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roundKey]);
 
-  // Shuffled order for display (not sorted by score)
+  // Shuffled order for display (randomize so strongest isn't always first)
   const displayOrder = useMemo(() => {
     const shuffled = [...rankedPasswords];
-    // Simple deterministic shuffle for consistent display
-    shuffled.sort((a, b) => a.password.localeCompare(b.password));
+    shuffled.sort(() => Math.random() - 0.5);
     return shuffled;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rankedPasswords]);
 
   const handleRankSelect = (passwordIndex: number, rank: number) => {
@@ -64,10 +76,11 @@ export default function ChallengeGame({
     setSelectedRanks(newRanks);
   };
 
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     setRevealed(false);
     setSelectedRanks({});
-  };
+    setRoundKey((prev) => prev + 1); // Trigger new random selection
+  }, []);
 
   const cardClasses = `
     p-4 rounded-lg transition-all
@@ -92,6 +105,9 @@ export default function ChallengeGame({
           : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}
   `;
 
+  // Find the strongest password for the takeaway message
+  const strongestPassword = rankedPasswords.find((pw) => pw.actualRank === 1);
+
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -111,7 +127,7 @@ export default function ChallengeGame({
       <div className="grid gap-4 sm:grid-cols-2">
         {displayOrder.map((pw, index) => (
           <div
-            key={index}
+            key={`${roundKey}-${index}`}
             className={`${cardClasses} ${
               revealed
                 ? pw.actualRank === 1
@@ -202,13 +218,13 @@ export default function ChallengeGame({
                 ? 'bg-blue-600 text-white hover:bg-blue-500 border-2 border-blue-400'
                 : 'bg-blue-600 text-white hover:bg-blue-700'}`}
           >
-            Play Again
+            New Round
           </button>
         )}
       </div>
 
       {/* Key takeaway after reveal */}
-      {revealed && (
+      {revealed && strongestPassword && (
         <div
           className={`p-6 rounded-lg ${
             highContrast
@@ -224,13 +240,11 @@ export default function ChallengeGame({
             Key Takeaway
           </h3>
           <p className={`${mutedClasses} ${presenterMode ? 'text-presenter-sm' : 'text-base'}`}>
-            The <strong>passphrase</strong> wins! Even without special characters,
-            its <strong>length</strong> (28 characters) makes it extremely hard to crack.
-            Meanwhile, short passwords with common patterns like &quot;P@ssw0rd123&quot; are
-            among the first things attackers try.
+            The winner is <strong className="font-mono">{strongestPassword.password}</strong> with
+            a score of <strong>{strongestPassword.score}/100</strong>. {strongestPassword.explanation}
           </p>
           <p className={`mt-3 ${mutedClasses} ${presenterMode ? 'text-presenter-sm' : 'text-base'}`}>
-            <strong>Remember:</strong> Length beats complexity. A 4-word passphrase
+            <strong>Remember:</strong> Length beats complexity. A long passphrase
             is both easier to remember AND more secure than a short complex password.
           </p>
         </div>

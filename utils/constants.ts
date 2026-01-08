@@ -52,8 +52,11 @@ export const COMMON_PASSWORDS: string[] = [
   'access',
   'flower',
   'passw0rd',
+  'passw0rd!',
   'p@ssword',
+  'p@ssword!',
   'p@ssw0rd',
+  'p@ssw0rd!',
   'pass1234',
   'changeme',
   'computer',
@@ -62,15 +65,17 @@ export const COMMON_PASSWORDS: string[] = [
 ];
 
 // Sample passwords for demonstration (fictional, safe to display)
+// Sorted from weakest to strongest
 export const SAMPLE_PASSWORDS = [
   { label: 'Very Weak: "password"', value: 'password' },
-  { label: 'Weak: "Summer2026!"', value: 'Summer2026!' },
-  { label: 'Weak: "P@ssw0rd!"', value: 'P@ssw0rd!' },
-  { label: 'Medium: "MyDog$Fluffy99"', value: 'MyDog$Fluffy99' },
-  { label: 'Better: "Correct7Battery!River"', value: 'Correct7Battery!River' },
-  { label: 'Strong: "purple-elephant-dancing-rain"', value: 'purple-elephant-dancing-rain' },
+  { label: 'Very Weak: "P@ssw0rd!"', value: 'P@ssw0rd!' },
+  { label: 'Very Weak: "Summer2026!"', value: 'Summer2026!' },
+  { label: 'Weak: "Hello123!"', value: 'Hello123!' },
+  { label: 'OK: "MyDog$Fluffy"', value: 'MyDog$Fluffy' },
+  { label: 'Strong: "MyDog$Fluffy99"', value: 'MyDog$Fluffy99' },
   { label: 'Strong: "Tr0ub4dor&3Horse"', value: 'Tr0ub4dor&3Horse' },
-  { label: 'Very Strong: "xK9#mP2$vL7@nQ4"', value: 'xK9#mP2$vL7@nQ4' },
+  { label: 'Very Strong: "purple-elephant-dancing-rain"', value: 'purple-elephant-dancing-rain' },
+  { label: 'Very Strong: "Blue7-Tiger$-Runs9-Fast!"', value: 'Blue7-Tiger$-Runs9-Fast!' },
 ];
 
 // Keyboard patterns (rows and common walks)
@@ -156,27 +161,92 @@ export const PASSPHRASE_VERBS: string[] = [
   'glides', 'soars', 'bounces', 'sparkles', 'shines', 'glows',
 ];
 
-// Challenge game passwords for ranking
-export const CHALLENGE_PASSWORDS = [
+// Challenge game passwords pool - 4 random ones selected each round
+export const CHALLENGE_PASSWORDS_POOL = [
+  // Very Weak (0-20)
   {
-    password: 'Summer2024!',
-    score: 35,
-    explanation: 'Follows a predictable pattern: Season + Year + Symbol. Easy to guess.',
+    password: 'password',
+    score: 5,
+    explanation: 'One of the most common passwords. Attackers try this first.',
   },
   {
-    password: 'P@ssw0rd123',
-    score: 25,
+    password: 'P@ssw0rd!',
+    score: 12,
     explanation: 'Common substitutions (@ for a, 0 for o) are well-known to attackers.',
   },
   {
-    password: 'correct-horse-battery-staple',
-    score: 85,
-    explanation: 'Long passphrase with multiple words. Length provides excellent protection.',
+    password: '123456789',
+    score: 8,
+    explanation: 'Simple number sequence. Cracked instantly.',
+  },
+  {
+    password: 'qwerty123',
+    score: 10,
+    explanation: 'Keyboard pattern + numbers. Very predictable.',
+  },
+  // Weak (20-40)
+  {
+    password: 'Summer2024!',
+    score: 28,
+    explanation: 'Season + Year + Symbol pattern. Very commonly guessed.',
+  },
+  {
+    password: 'Hello123!',
+    score: 32,
+    explanation: 'Common word + numbers + symbol. Too short and predictable.',
+  },
+  {
+    password: 'iloveyou99',
+    score: 25,
+    explanation: 'Common phrase with numbers. In most password dictionaries.',
+  },
+  // OK (40-60)
+  {
+    password: 'MyDog$Fluffy',
+    score: 52,
+    explanation: 'Personal but decent length. Would be stronger with more characters.',
   },
   {
     password: 'Jk8$mN2#pL',
-    score: 65,
-    explanation: 'Good variety but only 10 characters. Longer would be better.',
+    score: 48,
+    explanation: 'Good variety but only 10 characters. Length matters more.',
+  },
+  {
+    password: 'Coffee&Cake22',
+    score: 55,
+    explanation: 'Decent mix but could be longer for better security.',
+  },
+  // Strong (60-80)
+  {
+    password: 'MyDog$Fluffy99',
+    score: 68,
+    explanation: 'Good length and variety. A solid password choice.',
+  },
+  {
+    password: 'Tr0ub4dor&3Horse',
+    score: 72,
+    explanation: '16 characters with good variety. Strong password.',
+  },
+  {
+    password: 'Pizza!Moon#Star7',
+    score: 70,
+    explanation: 'Random words with symbols and numbers. Good strength.',
+  },
+  // Very Strong (80+)
+  {
+    password: 'correct-horse-battery-staple',
+    score: 92,
+    explanation: 'Long passphrase (28 chars). Length beats complexity!',
+  },
+  {
+    password: 'purple-elephant-dancing-rain',
+    score: 95,
+    explanation: '4-word passphrase. Easy to remember, very hard to crack.',
+  },
+  {
+    password: 'Blue7-Tiger$-Runs9-Fast!',
+    score: 98,
+    explanation: 'Long passphrase with numbers and symbols. Excellent!',
   },
 ];
 
