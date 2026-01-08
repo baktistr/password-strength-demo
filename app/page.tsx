@@ -191,6 +191,18 @@ export default function Home() {
             Built for educational purposes. Remember: use a password manager and
             enable MFA everywhere!
           </p>
+          <p className="mt-2">
+            <a
+              href="https://github.com/baktistr/password-strength-demo"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`underline hover:no-underline ${
+                highContrast ? 'text-blue-400' : 'text-blue-600'
+              }`}
+            >
+              View on GitHub
+            </a>
+          </p>
         </footer>
       </div>
     </div>
