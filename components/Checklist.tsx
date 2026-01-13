@@ -67,8 +67,8 @@ export default function Checklist({
 
       <div className="space-y-2">
         {/* Length checks - emphasized as most important */}
-        <div className={`${itemClasses} ${length >= LENGTH_SCORES.MIN_LENGTH ? passClasses : failClasses}`}>
-          <CheckIcon pass={length >= LENGTH_SCORES.MIN_LENGTH} />
+        <div className={`${itemClasses} ${length >= 8 ? passClasses : failClasses}`}>
+          <CheckIcon pass={length >= 8} />
           <div>
             <p className={textClasses}>
               <strong>At least 8 characters</strong>
@@ -77,7 +77,7 @@ export default function Checklist({
               )}
             </p>
             <p className={`${mutedClasses} ${presenterMode ? 'text-sm' : 'text-xs'}`}>
-              Minimum length — but longer is much better!
+              Absolute minimum — but you should aim higher!
             </p>
           </div>
         </div>

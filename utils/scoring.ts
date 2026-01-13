@@ -42,53 +42,60 @@ export function analyzeCharacters(password: string): CharacterAnalysis {
 }
 
 /**
- * Calculate length score (up to 60 points)
- * Length is weighted heavily as it's the most important factor
+ * Calculate length score (up to 70 points)
+ * Length is the most critical factor - CyLab research shows it's more important than complexity
  */
 function calculateLengthScore(length: number): number {
   if (length === 0) return 0;
-  if (length < LENGTH_SCORES.MIN_LENGTH) {
-    // Below minimum: scale from 0-15
-    return Math.floor((length / LENGTH_SCORES.MIN_LENGTH) * 15);
+  if (length < 8) {
+    // Below 8 chars: very weak, scale from 0-10
+    return Math.floor((length / 8) * 10);
   }
-  if (length < LENGTH_SCORES.GOOD_LENGTH) {
-    // 8-11 chars: scale from 15-35
-    return 15 + Math.floor(((length - LENGTH_SCORES.MIN_LENGTH) / 4) * 20);
+  if (length < 12) {
+    // 8-11 chars: weak to ok, scale from 10-30
+    return 10 + Math.floor(((length - 8) / 4) * 20);
   }
-  if (length < LENGTH_SCORES.GREAT_LENGTH) {
-    // 12-15 chars: scale from 35-50
-    return 35 + Math.floor(((length - LENGTH_SCORES.GOOD_LENGTH) / 4) * 15);
+  if (length < 16) {
+    // 12-15 chars: good, scale from 30-50
+    return 30 + Math.floor(((length - 12) / 4) * 20);
   }
-  if (length < LENGTH_SCORES.EXCELLENT_LENGTH) {
-    // 16-19 chars: scale from 50-55
-    return 50 + Math.floor(((length - LENGTH_SCORES.GREAT_LENGTH) / 4) * 5);
+  if (length < 20) {
+    // 16-19 chars: strong, scale from 50-60
+    return 50 + Math.floor(((length - 16) / 4) * 10);
   }
-  // 20+ chars: max length score of 60
-  return 60;
+  // 20+ chars: very strong, scale from 60-70 (max out at 25 chars)
+  return Math.min(70, 60 + Math.floor(((length - 20) / 5) * 10));
 }
 
 /**
- * Calculate variety score (up to 20 points)
- * Based on character types used
+ * Calculate variety score (up to 15 points)
+ * CyLab research shows variety matters, but less than length
+ * Unpredictable placement of character types is key
  */
 function calculateVarietyScore(analysis: CharacterAnalysis): number {
   let score = 0;
 
-  // Points for each character type
-  if (analysis.hasLowercase) score += 4;
-  if (analysis.hasUppercase) score += 4;
-  if (analysis.hasNumbers) score += 4;
-  if (analysis.hasSymbols) score += 5;
+  // Count character classes (lowercase is baseline, doesn't add points)
+  let characterClasses = 0;
+  if (analysis.hasLowercase) characterClasses++;
+  if (analysis.hasUppercase) characterClasses++;
+  if (analysis.hasNumbers) characterClasses++;
+  if (analysis.hasSymbols) characterClasses++;
 
-  // Bonus for high unique character ratio
+  // Award points based on character class diversity
+  if (characterClasses >= 2) score += 3;
+  if (characterClasses >= 3) score += 3;
+  if (characterClasses >= 4) score += 3;
+
+  // Bonus for high unique character ratio (indicates less repetition)
   if (analysis.length > 0) {
     const uniqueRatio = analysis.uniqueChars / analysis.length;
     if (uniqueRatio > 0.8) score += 3;
     else if (uniqueRatio > 0.6) score += 2;
-    else if (uniqueRatio > 0.4) score += 1;
+    else if (uniqueRatio > 0.5) score += 1;
   }
 
-  return Math.min(score, 20);
+  return Math.min(score, 15);
 }
 
 /**
@@ -149,69 +156,92 @@ function estimateCrackTime(score: number, analysis: CharacterAnalysis): string {
 }
 
 /**
- * Generate suggestions based on weaknesses
+ * Generate prioritized suggestions based on weaknesses
+ * Following CyLab methodology: limit to top 3 most critical improvements
  */
 function generateSuggestions(
   analysis: CharacterAnalysis,
-  patterns: PatternMatch[]
+  patterns: PatternMatch[],
+  score: number
 ): string[] {
   const suggestions: string[] = [];
 
-  // Length suggestions (most important)
-  if (analysis.length < LENGTH_SCORES.MIN_LENGTH) {
-    suggestions.push('Make it at least 12 characters (length is the most important factor!)');
-  } else if (analysis.length < LENGTH_SCORES.GOOD_LENGTH) {
-    suggestions.push('Aim for 12+ characters — longer passwords are exponentially harder to crack');
-  } else if (analysis.length < LENGTH_SCORES.GREAT_LENGTH) {
-    suggestions.push('Great length! Consider 16+ characters for sensitive accounts');
-  }
+  // Priority 1: Critical patterns (common passwords, keyboard patterns)
+  const criticalPatterns = patterns.filter(p =>
+    p.type === 'common' ||
+    p.type === 'common-base' ||
+    p.type === 'keyboard' ||
+    p.type === 'season-year' ||
+    p.type === 'month-year'
+  );
 
-  // Pattern-based suggestions
-  for (const pattern of patterns) {
-    switch (pattern.type) {
-      case 'common':
-        suggestions.push('Avoid common passwords — attackers try these first');
-        break;
-      case 'keyboard':
-      case 'keyboard-partial':
-        suggestions.push('Avoid keyboard patterns like "qwerty" or "asdf"');
-        break;
-      case 'sequential':
-        suggestions.push('Avoid sequential characters like "123" or "abc"');
-        break;
-      case 'year-recent':
-      case 'season-year':
-      case 'month-year':
-        suggestions.push('Avoid date patterns — they\'re commonly guessed');
-        break;
-      case 'leet':
-        suggestions.push('Letter substitutions (@ for a, 0 for o) are well-known to attackers');
-        break;
+  if (criticalPatterns.length > 0) {
+    const pattern = criticalPatterns[0];
+    if (pattern.type === 'common' || pattern.type === 'common-base') {
+      suggestions.push('This password (or parts of it) appears in common password lists');
+    } else if (pattern.type === 'keyboard') {
+      suggestions.push('Avoid keyboard patterns — attackers check these first');
+    } else if (pattern.type === 'season-year' || pattern.type === 'month-year') {
+      suggestions.push('Avoid predictable patterns like Season+Year or Month+Year');
     }
-
-    // Limit suggestions
-    if (suggestions.length >= 3) break;
   }
 
-  // Variety suggestions (lower priority than length)
+  // Priority 2: Length (most important positive factor)
+  if (suggestions.length < 3 && analysis.length < 12) {
+    suggestions.push('Make it at least 12 characters — length is your strongest defense');
+  } else if (suggestions.length < 3 && analysis.length < 16) {
+    suggestions.push('Consider 16+ characters for maximum security');
+  }
+
+  // Priority 3: Other patterns
   if (suggestions.length < 3) {
-    if (!analysis.hasLowercase && !analysis.hasUppercase) {
-      suggestions.push('Add some letters for variety');
-    }
-    if (analysis.length >= 12 && !analysis.hasNumbers && !analysis.hasSymbols) {
-      suggestions.push('Consider adding numbers or symbols for extra variety');
+    const otherPatterns = patterns.filter(p =>
+      p.type === 'leet' ||
+      p.type === 'leet-word' ||
+      p.type === 'sequential' ||
+      p.type === 'repeated' ||
+      p.type === 'year-recent'
+    );
+
+    if (otherPatterns.length > 0) {
+      const pattern = otherPatterns[0];
+      if (pattern.type === 'leet' || pattern.type === 'leet-word') {
+        suggestions.push('Simple substitutions (@=a, 0=o) don\'t fool modern crackers');
+      } else if (pattern.type === 'sequential') {
+        suggestions.push('Avoid sequential patterns like "123" or "abc"');
+      } else if (pattern.type === 'repeated') {
+        suggestions.push('Avoid repeated characters');
+      } else if (pattern.type === 'year-recent') {
+        suggestions.push('Avoid recent years — they\'re commonly guessed');
+      }
     }
   }
 
-  // Always recommend password manager and MFA
-  if (suggestions.length < 4) {
-    suggestions.push('Use a password manager to generate and store unique passwords');
-  }
-  if (suggestions.length < 5) {
-    suggestions.push('Enable two-factor authentication (MFA) whenever possible');
+  // Priority 4: Character variety (only if no major issues)
+  if (suggestions.length < 3) {
+    const characterClasses = [
+      analysis.hasLowercase,
+      analysis.hasUppercase,
+      analysis.hasNumbers,
+      analysis.hasSymbols
+    ].filter(Boolean).length;
+
+    if (characterClasses < 2) {
+      suggestions.push('Mix different character types (letters, numbers, symbols)');
+    } else if (analysis.length >= 12 && characterClasses < 3) {
+      suggestions.push('Add symbols or numbers in unpredictable positions');
+    }
   }
 
-  return suggestions.slice(0, 5);
+  // If password is very strong, show positive reinforcement
+  if (score >= 75 && suggestions.length === 0) {
+    suggestions.push('Strong password! Remember: never reuse it across sites');
+    suggestions.push('Use a password manager to store it securely');
+    suggestions.push('Enable two-factor authentication for maximum protection');
+  }
+
+  // Always limit to top 3 most critical suggestions (CyLab approach)
+  return suggestions.slice(0, 3);
 }
 
 /**
@@ -262,6 +292,6 @@ export function calculateStrength(password: string): StrengthResult {
     characterAnalysis: analysis,
     patterns,
     crackTimeCategory: estimateCrackTime(score, analysis),
-    suggestions: generateSuggestions(analysis, patterns),
+    suggestions: generateSuggestions(analysis, patterns, score),
   };
 }
