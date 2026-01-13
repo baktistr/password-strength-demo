@@ -83,17 +83,6 @@ export default function PresenterMode({
         >
           {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
         </button>
-
-        {/* Speaker Notes Toggle */}
-        <button
-          onClick={() => setShowNotes(!showNotes)}
-          className={buttonClasses(showNotes)}
-          aria-pressed={showNotes}
-          aria-expanded={showNotes}
-          aria-label={showNotes ? 'Hide speaker notes' : 'Show speaker notes'}
-        >
-          {showNotes ? '[x] ' : '[ ] '}Speaker Notes
-        </button>
       </div>
     </div>
   );

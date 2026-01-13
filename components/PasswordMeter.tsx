@@ -41,74 +41,77 @@ export default function PasswordMeter({
   `;
 
   return (
-    <div className="space-y-8">
-      {/* Password Input Section */}
-      <section aria-labelledby="input-section">
-        <h2
-          id="input-section"
-          className={`font-semibold mb-4 ${textClasses} ${
-            presenterMode ? 'text-presenter-lg' : 'text-xl'
-          }`}
-        >
-          Test a Password
-        </h2>
-        <PasswordInput
-          password={password}
-          setPassword={setPassword}
-          presenterMode={presenterMode}
-          highContrast={highContrast}
-        />
-      </section>
-
-      {/* Passphrase Mode Toggle */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={() => setShowPassphraseMode(!showPassphraseMode)}
-          className={toggleButtonClasses}
-          aria-expanded={showPassphraseMode}
-          aria-controls="passphrase-section"
-        >
-          {showPassphraseMode ? '[x] ' : '[ ] '}Passphrase Mode
-        </button>
-        <span
-          className={`${highContrast ? 'text-gray-400' : 'text-gray-500'} ${
-            presenterMode ? 'text-sm' : 'text-xs'
-          }`}
-        >
-          Try word-based passwords
-        </span>
-      </div>
-
-      {/* Passphrase Mode Panel */}
-      {showPassphraseMode && (
-        <section id="passphrase-section" aria-labelledby="passphrase-title">
-          <PassphraseMode
+    <div className="grid gap-8 lg:grid-cols-[1fr,400px]">
+      {/* Left Column - Main Content */}
+      <div className="space-y-8">
+        {/* Password Input Section */}
+        <section aria-labelledby="input-section">
+          <h2
+            id="input-section"
+            className={`font-semibold mb-4 ${textClasses} ${
+              presenterMode ? 'text-presenter-lg' : 'text-xl'
+            }`}
+          >
+            Test a Password
+          </h2>
+          <PasswordInput
+            password={password}
             setPassword={setPassword}
             presenterMode={presenterMode}
             highContrast={highContrast}
           />
         </section>
-      )}
 
-      {/* Strength Results */}
-      <section aria-labelledby="strength-section">
-        <h2
-          id="strength-section"
-          className={`font-semibold mb-4 ${textClasses} ${
-            presenterMode ? 'text-presenter-lg' : 'text-xl'
-          }`}
-        >
-          Strength Score
-        </h2>
-        <StrengthBar
-          result={strengthResult}
-          presenterMode={presenterMode}
-          highContrast={highContrast}
-        />
-      </section>
+        {/* Passphrase Mode Toggle */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowPassphraseMode(!showPassphraseMode)}
+            className={toggleButtonClasses}
+            aria-expanded={showPassphraseMode}
+            aria-controls="passphrase-section"
+          >
+            {showPassphraseMode ? '[x] ' : '[ ] '}Passphrase Mode
+          </button>
+          <span
+            className={`${highContrast ? 'text-gray-400' : 'text-gray-500'} ${
+              presenterMode ? 'text-sm' : 'text-xs'
+            }`}
+          >
+            Try word-based passwords
+          </span>
+        </div>
 
-      {/* Two-column layout for checklist and tips */}
-      <div className="grid gap-8 lg:grid-cols-2">
+        {/* Passphrase Mode Panel */}
+        {showPassphraseMode && (
+          <section id="passphrase-section" aria-labelledby="passphrase-title">
+            <PassphraseMode
+              setPassword={setPassword}
+              presenterMode={presenterMode}
+              highContrast={highContrast}
+            />
+          </section>
+        )}
+
+        {/* Strength Results */}
+        <section aria-labelledby="strength-section">
+          <h2
+            id="strength-section"
+            className={`font-semibold mb-4 ${textClasses} ${
+              presenterMode ? 'text-presenter-lg' : 'text-xl'
+            }`}
+          >
+            Strength Score
+          </h2>
+          <StrengthBar
+            result={strengthResult}
+            presenterMode={presenterMode}
+            highContrast={highContrast}
+          />
+        </section>
+      </div>
+
+      {/* Right Column - Checklist and Tips */}
+      <div className="space-y-8">
         {/* Checklist */}
         <section aria-labelledby="checklist-section">
           <Checklist
