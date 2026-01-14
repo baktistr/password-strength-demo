@@ -21,7 +21,7 @@ export function checkCommonPassword(password: string): PatternMatch | null {
     return {
       type: 'common',
       description: 'This is a very common password that attackers try first',
-      penalty: 50,
+      penalty: 70, // Severe penalty - nearly impossible to recover from
     };
   }
 
@@ -31,7 +31,7 @@ export function checkCommonPassword(password: string): PatternMatch | null {
       return {
         type: 'common-base',
         description: 'Based on a common password with minor additions',
-        penalty: 30,
+        penalty: 50, // Major penalty - dictionary base is very weak
       };
     }
   }
@@ -80,31 +80,50 @@ export function checkSequentialChars(password: string): PatternMatch | null {
 
 /**
  * Check for repeated characters (aaa, 111, etc.)
+ * CyLab research: repeated chars don't add strength even if they make password longer
  */
 export function checkRepeatedChars(password: string): PatternMatch | null {
   let maxRepeat = 1;
   let currentRepeat = 1;
+  let totalRepeats = 0;
 
   for (let i = 1; i < password.length; i++) {
     if (password[i].toLowerCase() === password[i - 1].toLowerCase()) {
       currentRepeat++;
       maxRepeat = Math.max(maxRepeat, currentRepeat);
+      totalRepeats++;
     } else {
       currentRepeat = 1;
     }
   }
 
-  if (maxRepeat >= 4) {
+  // Severe penalty for many repeats - they're predictable padding
+  if (maxRepeat >= 5) {
     return {
       type: 'repeated',
-      description: 'Contains many repeated characters in a row',
-      penalty: 15,
+      description: 'Contains many repeated characters in a row (adds length but not strength)',
+      penalty: 30, // Severe - clearly padding
+    };
+  } else if (maxRepeat >= 4) {
+    return {
+      type: 'repeated',
+      description: 'Contains repeated characters (adds minimal strength)',
+      penalty: 20,
     };
   } else if (maxRepeat >= 3) {
     return {
       type: 'repeated-minor',
       description: 'Contains repeated characters',
-      penalty: 5,
+      penalty: 10,
+    };
+  }
+
+  // Additional penalty if overall repetition is high
+  if (totalRepeats > password.length * 0.3) {
+    return {
+      type: 'repeated-excessive',
+      description: 'Too many repeated characters throughout password',
+      penalty: 15,
     };
   }
 
@@ -200,6 +219,7 @@ export function checkDatePatterns(password: string): PatternMatch | null {
 
 /**
  * Check for leet speak substitutions (@ for a, 0 for o, etc.)
+ * CyLab: dictionary words with substitutions are still dictionary-based
  */
 export function checkLeetSpeak(password: string): PatternMatch | null {
   // Convert leet speak to regular letters
@@ -226,17 +246,17 @@ export function checkLeetSpeak(password: string): PatternMatch | null {
     return {
       type: 'leet',
       description: 'Uses common letter substitutions (like @ for a) that attackers know',
-      penalty: 25,
+      penalty: 40, // Major penalty - still dictionary-based
     };
   }
 
   // Check for common words with leet speak
   for (const word of COMMON_WORDS) {
-    if (converted.includes(word)) {
+    if (converted.includes(word) && word.length >= 4) {
       return {
         type: 'leet-word',
         description: 'Contains a common word with substitutions',
-        penalty: 10,
+        penalty: 25, // Significant penalty - dictionary word detected
       };
     }
   }

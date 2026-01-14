@@ -157,7 +157,7 @@ function estimateCrackTime(score: number, analysis: CharacterAnalysis): string {
 
 /**
  * Generate prioritized suggestions based on weaknesses
- * Following CyLab methodology: limit to top 3 most critical improvements
+ * Show all relevant feedback (no arbitrary limits)
  */
 function generateSuggestions(
   analysis: CharacterAnalysis,
@@ -166,59 +166,83 @@ function generateSuggestions(
 ): string[] {
   const suggestions: string[] = [];
 
-  // Priority 1: Critical patterns (common passwords, keyboard patterns)
+  // Priority 1: Critical patterns (common passwords, keyboard patterns, dictionary words)
   const criticalPatterns = patterns.filter(p =>
     p.type === 'common' ||
     p.type === 'common-base' ||
     p.type === 'keyboard' ||
     p.type === 'season-year' ||
-    p.type === 'month-year'
+    p.type === 'month-year' ||
+    p.type === 'leet' ||
+    p.type === 'leet-word'
   );
 
-  if (criticalPatterns.length > 0) {
-    const pattern = criticalPatterns[0];
-    if (pattern.type === 'common' || pattern.type === 'common-base') {
-      suggestions.push('This password (or parts of it) appears in common password lists');
+  for (const pattern of criticalPatterns) {
+    if (pattern.type === 'common') {
+      suggestions.push('This is a very common password that appears in attacker dictionaries');
+    } else if (pattern.type === 'common-base') {
+      suggestions.push('Based on a common password — minor additions don\'t help much');
     } else if (pattern.type === 'keyboard') {
-      suggestions.push('Avoid keyboard patterns — attackers check these first');
+      suggestions.push('Avoid keyboard patterns like "qwerty" or "asdf" — they\'re easily guessed');
     } else if (pattern.type === 'season-year' || pattern.type === 'month-year') {
-      suggestions.push('Avoid predictable patterns like Season+Year or Month+Year');
+      suggestions.push('Season+Year or Month+Year patterns are extremely predictable');
+    } else if (pattern.type === 'leet') {
+      suggestions.push('Letter substitutions (@=a, 0=o, etc.) are well-known to password crackers');
+    } else if (pattern.type === 'leet-word') {
+      suggestions.push('Dictionary words with letter substitutions are still vulnerable');
     }
   }
 
-  // Priority 2: Length (most important positive factor)
-  if (suggestions.length < 3 && analysis.length < 12) {
-    suggestions.push('Make it at least 12 characters — length is your strongest defense');
-  } else if (suggestions.length < 3 && analysis.length < 16) {
-    suggestions.push('Consider 16+ characters for maximum security');
-  }
+  // Priority 2: Repeated characters (they add length but not strength)
+  const repeatPatterns = patterns.filter(p =>
+    p.type === 'repeated' ||
+    p.type === 'repeated-minor' ||
+    p.type === 'repeated-excessive'
+  );
 
-  // Priority 3: Other patterns
-  if (suggestions.length < 3) {
-    const otherPatterns = patterns.filter(p =>
-      p.type === 'leet' ||
-      p.type === 'leet-word' ||
-      p.type === 'sequential' ||
-      p.type === 'repeated' ||
-      p.type === 'year-recent'
-    );
-
-    if (otherPatterns.length > 0) {
-      const pattern = otherPatterns[0];
-      if (pattern.type === 'leet' || pattern.type === 'leet-word') {
-        suggestions.push('Simple substitutions (@=a, 0=o) don\'t fool modern crackers');
-      } else if (pattern.type === 'sequential') {
-        suggestions.push('Avoid sequential patterns like "123" or "abc"');
-      } else if (pattern.type === 'repeated') {
-        suggestions.push('Avoid repeated characters');
-      } else if (pattern.type === 'year-recent') {
-        suggestions.push('Avoid recent years — they\'re commonly guessed');
-      }
+  for (const pattern of repeatPatterns) {
+    if (pattern.type === 'repeated' || pattern.type === 'repeated-excessive') {
+      suggestions.push('Repeated characters add length but very little actual strength');
+    } else if (pattern.type === 'repeated-minor') {
+      suggestions.push('Some repeated characters detected — try varying your characters more');
     }
   }
 
-  // Priority 4: Character variety (only if no major issues)
-  if (suggestions.length < 3) {
+  // Priority 3: Length (most important positive factor)
+  if (analysis.length < 8) {
+    suggestions.push('WAY too short — make it at least 8 characters (12+ recommended)');
+  } else if (analysis.length < 12) {
+    suggestions.push('Aim for 12+ characters — length is your strongest defense');
+  } else if (analysis.length < 16) {
+    suggestions.push('Consider 16+ characters for maximum security on important accounts');
+  }
+
+  // Priority 4: Other patterns
+  const otherPatterns = patterns.filter(p =>
+    p.type === 'sequential' ||
+    p.type === 'sequential-minor' ||
+    p.type === 'year-recent' ||
+    p.type === 'year' ||
+    p.type === 'date' ||
+    p.type === 'keyboard-partial'
+  );
+
+  for (const pattern of otherPatterns) {
+    if (pattern.type === 'sequential' || pattern.type === 'sequential-minor') {
+      suggestions.push('Avoid sequential patterns like "123" or "abc"');
+    } else if (pattern.type === 'year-recent') {
+      suggestions.push('Recent years (2000-2030) are commonly guessed by attackers');
+    } else if (pattern.type === 'year') {
+      suggestions.push('Birth years and dates are commonly tried in password attacks');
+    } else if (pattern.type === 'date') {
+      suggestions.push('Date patterns are predictable — avoid them in passwords');
+    } else if (pattern.type === 'keyboard-partial') {
+      suggestions.push('Even partial keyboard patterns weaken your password');
+    }
+  }
+
+  // Priority 5: Character variety (only if no major issues)
+  if (patterns.length === 0 || score > 40) {
     const characterClasses = [
       analysis.hasLowercase,
       analysis.hasUppercase,
@@ -229,19 +253,24 @@ function generateSuggestions(
     if (characterClasses < 2) {
       suggestions.push('Mix different character types (letters, numbers, symbols)');
     } else if (analysis.length >= 12 && characterClasses < 3) {
-      suggestions.push('Add symbols or numbers in unpredictable positions');
+      suggestions.push('Add symbols or numbers in unpredictable positions for extra strength');
+    } else if (analysis.length >= 16 && characterClasses < 4) {
+      suggestions.push('Use all character types (upper, lower, numbers, symbols) for maximum entropy');
     }
   }
 
-  // If password is very strong, show positive reinforcement
-  if (score >= 75 && suggestions.length === 0) {
-    suggestions.push('Strong password! Remember: never reuse it across sites');
-    suggestions.push('Use a password manager to store it securely');
-    suggestions.push('Enable two-factor authentication for maximum protection');
+  // If password is very strong, show positive reinforcement and best practices
+  if (score >= 75 && patterns.length === 0) {
+    suggestions.push('✓ Strong password! Remember: never reuse it across different sites');
+    suggestions.push('✓ Use a password manager to generate and store unique passwords');
+    suggestions.push('✓ Enable two-factor authentication (MFA) for maximum protection');
+  } else if (score >= 60 && suggestions.length === 0) {
+    suggestions.push('✓ Good password! Consider making it even longer for important accounts');
+    suggestions.push('✓ Never reuse passwords across sites');
+    suggestions.push('✓ Enable MFA wherever possible');
   }
 
-  // Always limit to top 3 most critical suggestions (CyLab approach)
-  return suggestions.slice(0, 3);
+  return suggestions;
 }
 
 /**
