@@ -16,6 +16,7 @@ interface ChallengePassword {
 
 interface RankedPassword extends ChallengePassword {
   actualRank: number;
+  tiedRanks: number[]; // All valid ranks for this score (for ties)
 }
 
 /**
@@ -42,7 +43,7 @@ export default function ChallengeGame({
   const mutedClasses = highContrast ? 'text-gray-300' : 'text-gray-600';
 
   // Randomly select 4 passwords and sort by score for ranking
-  // Break ties using: 1) length (longer=stronger), 2) alphabetical
+  // Handle ties: passwords with same score share the same valid rank range
   const rankedPasswords: RankedPassword[] = useMemo(() => {
     const selected = selectRandom(CHALLENGE_PASSWORDS_POOL, 4);
     const sorted = [...selected].sort((a, b) => {
@@ -53,10 +54,48 @@ export default function ChallengeGame({
       // Tertiary: alphabetical for consistent ordering
       return a.password.localeCompare(b.password);
     });
-    return sorted.map((pw, index) => ({
-      ...pw,
-      actualRank: index + 1,
-    }));
+    
+    // Assign ranks with tie handling
+    // Group passwords by score to find ties
+    const result: RankedPassword[] = [];
+    let currentRank = 1;
+    
+    for (let i = 0; i < sorted.length; i++) {
+      // Find all passwords with the same score (tie group)
+      const tiedIndices: number[] = [i];
+      let j = i + 1;
+      while (j < sorted.length && sorted[j].score === sorted[i].score) {
+        tiedIndices.push(j);
+        j++;
+      }
+      
+      // All tied passwords share the same valid rank range
+      const tiedRanks = tiedIndices.map((_, idx) => currentRank + idx);
+      
+      // Add current password with tie info
+      result.push({
+        ...sorted[i],
+        actualRank: currentRank,
+        tiedRanks: tiedRanks,
+      });
+      
+      // Skip to next non-tied password if we're not already past them
+      if (i < j - 1) {
+        // Process remaining tied passwords
+        for (let k = i + 1; k < j; k++) {
+          result.push({
+            ...sorted[k],
+            actualRank: currentRank + (k - i),
+            tiedRanks: tiedRanks,
+          });
+        }
+        i = j - 1; // Skip processed tied passwords
+      }
+      
+      currentRank = result.length + 1;
+    }
+    
+    return result;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roundKey]);
 
@@ -162,8 +201,9 @@ export default function ChallengeGame({
               </span>
               {[1, 2, 3, 4].map((rank) => {
                 const isSelected = selectedRanks[index] === rank;
-                const isCorrect = revealed && isSelected && rank === pw.actualRank;
-                const isWrong = revealed && isSelected && rank !== pw.actualRank;
+                // Use tiedRanks to check if selected rank is valid for this password
+                const isCorrect = revealed && isSelected && pw.tiedRanks.includes(rank);
+                const isWrong = revealed && isSelected && !pw.tiedRanks.includes(rank);
 
                 return (
                   <button
@@ -193,7 +233,11 @@ export default function ChallengeGame({
                 }`}
               >
                 <p className={`font-medium ${textClasses} ${presenterMode ? 'text-presenter-sm' : 'text-sm'}`}>
-                  Actual Rank: <strong>#{pw.actualRank}</strong> (Score: {pw.score}/100)
+                  {pw.tiedRanks.length > 1 ? (
+                    <>Rank: <strong>#{pw.tiedRanks.join(' or #')}</strong> (tied, Score: {pw.score}/100)</>
+                  ) : (
+                    <>Actual Rank: <strong>#{pw.actualRank}</strong> (Score: {pw.score}/100)</>
+                  )}
                 </p>
                 <p className={`mt-1 ${mutedClasses} ${presenterMode ? 'text-sm' : 'text-xs'}`}>
                   {pw.explanation}
