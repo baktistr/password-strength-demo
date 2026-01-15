@@ -33,7 +33,7 @@ export default function Home() {
 
   // Build class names based on mode
   const containerClasses = `
-    h-screen overflow-hidden transition-all duration-300 flex flex-col
+    min-h-screen transition-all duration-300 flex flex-col
     ${presenterMode ? 'presenter-mode' : ''}
     ${highContrast ? 'high-contrast bg-black' : 'bg-gray-50'}
     ${isFullscreen ? 'fullscreen-mode' : ''}

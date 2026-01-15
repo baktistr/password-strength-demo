@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { CHALLENGE_PASSWORDS_POOL } from '@/utils/constants';
-import Modal from './Modal';
 
 interface ChallengeGameProps {
   presenterMode: boolean;
@@ -38,7 +37,6 @@ export default function ChallengeGame({
   const [revealed, setRevealed] = useState(false);
   const [selectedRanks, setSelectedRanks] = useState<{ [key: number]: number }>({});
   const [roundKey, setRoundKey] = useState(0); // Used to trigger new random selection
-  const [showTakeaway, setShowTakeaway] = useState(false);
 
   const textClasses = highContrast ? 'text-white' : 'text-gray-900';
   const mutedClasses = highContrast ? 'text-gray-300' : 'text-gray-600';
@@ -89,7 +87,6 @@ export default function ChallengeGame({
   const resetGame = useCallback(() => {
     setRevealed(false);
     setSelectedRanks({});
-    setShowTakeaway(false);
     setRoundKey((prev) => prev + 1); // Trigger new random selection
   }, []);
 
@@ -234,71 +231,32 @@ export default function ChallengeGame({
         )}
       </div>
 
-      {/* Key takeaway button after reveal */}
+      {/* Key takeaway after reveal */}
       {revealed && strongestPassword && (
-        <div className="flex justify-center">
-          <button
-            onClick={() => setShowTakeaway(true)}
-            className={`px-6 py-3 rounded-lg font-bold transition-all
-              ${presenterMode ? 'text-presenter-sm' : 'text-base'}
-              ${highContrast
-                ? 'bg-purple-600 text-white hover:bg-purple-500 border-2 border-purple-400'
-                : 'bg-purple-600 text-white hover:bg-purple-700'}`}
+        <div
+          className={`p-6 rounded-lg ${
+            highContrast
+              ? 'bg-purple-900/50 border-2 border-purple-400'
+              : 'bg-purple-50 border-2 border-purple-200'
+          }`}
+        >
+          <h3
+            className={`font-bold mb-3 ${textClasses} ${
+              presenterMode ? 'text-presenter-lg' : 'text-xl'
+            }`}
           >
             🎯 Key Takeaway
-          </button>
+          </h3>
+          <p className={`${mutedClasses} ${presenterMode ? 'text-presenter-sm' : 'text-base'}`}>
+            The winner is <strong className="font-mono">{strongestPassword.password}</strong> with
+            a score of <strong>{strongestPassword.score}/100</strong>. {strongestPassword.explanation}
+          </p>
+          <p className={`mt-3 ${mutedClasses} ${presenterMode ? 'text-presenter-sm' : 'text-base'}`}>
+            <strong>Remember:</strong> Length beats complexity. A long passphrase
+            is both easier to remember AND more secure than a short complex password.
+          </p>
         </div>
       )}
-
-      {/* Key Takeaway Modal */}
-      <Modal
-        isOpen={showTakeaway}
-        onClose={() => setShowTakeaway(false)}
-        title="🎯 Key Takeaway"
-        highContrast={highContrast}
-        presenterMode={presenterMode}
-      >
-        {strongestPassword && (
-          <div className="space-y-4">
-            <div
-              className={`p-4 rounded-lg ${
-                highContrast
-                  ? 'bg-green-900/50 border border-green-600'
-                  : 'bg-green-50 border border-green-200'
-              }`}
-            >
-              <p className={`font-medium ${highContrast ? 'text-white' : 'text-gray-900'} ${presenterMode ? 'text-presenter-sm' : 'text-base'}`}>
-                🏆 The winner is:
-              </p>
-              <p className={`font-mono font-bold mt-2 ${highContrast ? 'text-green-400' : 'text-green-700'} ${presenterMode ? 'text-presenter-base' : 'text-lg'}`}>
-                {strongestPassword.password}
-              </p>
-              <p className={`mt-2 ${highContrast ? 'text-gray-300' : 'text-gray-600'} ${presenterMode ? 'text-presenter-sm' : 'text-sm'}`}>
-                Score: <strong>{strongestPassword.score}/100</strong>
-              </p>
-            </div>
-
-            <p className={`${highContrast ? 'text-gray-300' : 'text-gray-600'} ${presenterMode ? 'text-presenter-sm' : 'text-base'}`}>
-              {strongestPassword.explanation}
-            </p>
-
-            <div
-              className={`p-4 rounded-lg ${
-                highContrast
-                  ? 'bg-blue-900/50 border border-blue-600'
-                  : 'bg-blue-50 border border-blue-200'
-              }`}
-            >
-              <p className={`font-medium ${highContrast ? 'text-white' : 'text-gray-900'} ${presenterMode ? 'text-presenter-sm' : 'text-base'}`}>
-                💡 Remember:
-              </p>
-              <p className={`mt-2 ${highContrast ? 'text-gray-300' : 'text-gray-600'} ${presenterMode ? 'text-presenter-sm' : 'text-sm'}`}>
-                <strong>Length beats complexity.</strong> A long passphrase is both easier to remember AND more secure than a short complex password.
-              </p>
-            </div>
-          </div>
-        )}
-      </Modal>
     </div>
   );
 }
