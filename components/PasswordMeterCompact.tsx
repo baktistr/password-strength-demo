@@ -26,6 +26,7 @@ export default function PasswordMeterCompact({
   const [showPassphraseMode, setShowPassphraseMode] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
   const [showTips, setShowTips] = useState(false);
+  const [showPatterns, setShowPatterns] = useState(false);
 
   // Calculate strength whenever password changes
   const strengthResult = useMemo(() => calculateStrength(password), [password]);
@@ -78,6 +79,7 @@ export default function PasswordMeterCompact({
           setPassword={setPassword}
           presenterMode={presenterMode}
           highContrast={highContrast}
+          onOpenPassphrase={() => setShowPassphraseMode(true)}
         />
       </section>
 
@@ -90,8 +92,8 @@ export default function PasswordMeterCompact({
         />
       </section>
 
-      {/* Quick Stats Row */}
-      <div className={`flex items-center justify-center gap-6 py-2 ${presenterMode ? 'text-presenter-base' : 'text-base'}`}>
+      {/* Quick Stats Row - only chars and checks */}
+      <div className={`flex items-center justify-center gap-8 py-2 ${presenterMode ? 'text-presenter-base' : 'text-base'}`}>
         <div className={`text-center ${textClasses}`}>
           <span className="font-bold text-2xl">{characterAnalysis.length}</span>
           <span className={mutedClasses}> chars</span>
@@ -102,13 +104,9 @@ export default function PasswordMeterCompact({
           </span>
           <span className={mutedClasses}> checks</span>
         </div>
-        <div className={`text-center ${textClasses}`}>
-          <span className="font-bold text-2xl">{strengthResult.score}</span>
-          <span className={mutedClasses}>/100</span>
-        </div>
       </div>
 
-      {/* Action Buttons Row */}
+      {/* Action Buttons Row - Checklist, Tips, Patterns */}
       <div className="flex gap-3">
         <button
           onClick={() => setShowChecklist(true)}
@@ -143,12 +141,21 @@ export default function PasswordMeterCompact({
         </button>
 
         <button
-          onClick={() => setShowPassphraseMode(true)}
+          onClick={() => setShowPatterns(true)}
           className={actionButtonClasses()}
           aria-haspopup="dialog"
         >
-          <span>🔤</span>
-          <span>Passphrase</span>
+          <span>🔍</span>
+          <span>Patterns</span>
+          <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+            patterns.length > 0
+              ? 'bg-red-500/20 text-red-400'
+              : hasPasswordEntered
+                ? 'bg-green-500/20 text-green-400'
+                : 'bg-gray-500/20 text-gray-400'
+          }`}>
+            {patterns.length}
+          </span>
         </button>
       </div>
 
@@ -205,6 +212,78 @@ export default function PasswordMeterCompact({
             setShowTips(false);
           }}
         />
+      </Modal>
+
+      {/* Patterns Modal */}
+      <Modal
+        isOpen={showPatterns}
+        onClose={() => setShowPatterns(false)}
+        title={`Patterns Detected (${patterns.length})`}
+        highContrast={highContrast}
+        presenterMode={presenterMode}
+      >
+        <div className="space-y-4">
+          {patterns.length === 0 ? (
+            <div className={`p-4 rounded-lg ${
+              highContrast
+                ? 'bg-green-900/30 border border-green-600'
+                : 'bg-green-50 border border-green-200'
+            }`}>
+              <p className={`font-medium ${
+                highContrast ? 'text-green-400' : 'text-green-700'
+              } ${presenterMode ? 'text-presenter-sm' : 'text-base'}`}>
+                ✓ No weak patterns detected!
+              </p>
+              <p className={`mt-2 ${
+                highContrast ? 'text-gray-300' : 'text-gray-600'
+              } ${presenterMode ? 'text-sm' : 'text-xs'}`}>
+                {hasPasswordEntered 
+                  ? 'Your password avoids common patterns that attackers look for.'
+                  : 'Enter a password to check for weak patterns.'}
+              </p>
+            </div>
+          ) : (
+            patterns.map((pattern, index) => (
+              <div
+                key={index}
+                className={`p-4 rounded-lg ${
+                  highContrast
+                    ? 'bg-red-900/30 border border-red-600'
+                    : 'bg-red-50 border border-red-200'
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className={`font-medium ${
+                      highContrast ? 'text-red-400' : 'text-red-700'
+                    } ${presenterMode ? 'text-presenter-sm' : 'text-sm'}`}>
+                      ⚠️ {pattern.type.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                    </p>
+                    <p className={`mt-1 ${
+                      highContrast ? 'text-gray-300' : 'text-gray-600'
+                    } ${presenterMode ? 'text-sm' : 'text-xs'}`}>
+                      {pattern.description}
+                    </p>
+                  </div>
+                  <span className={`px-2 py-1 rounded text-xs font-mono ${
+                    highContrast
+                      ? 'bg-red-900 text-red-300'
+                      : 'bg-red-100 text-red-600'
+                  }`}>
+                    -{pattern.penalty} pts
+                  </span>
+                </div>
+                {pattern.matched && (
+                  <p className={`mt-2 font-mono text-xs ${
+                    highContrast ? 'text-gray-400' : 'text-gray-500'
+                  }`}>
+                    Found: "{pattern.matched}"
+                  </p>
+                )}
+              </div>
+            ))
+          )}
+        </div>
       </Modal>
 
       {/* Passphrase Modal */}

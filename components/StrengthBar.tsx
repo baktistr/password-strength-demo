@@ -91,68 +91,29 @@ export default function StrengthBar({
         <span>Very strong</span>
       </div>
 
-      {/* Crack Time Estimate & Patterns Detected */}
+      {/* Crack Time Estimate */}
       {result.characterAnalysis.length > 0 && (
-        <div className="flex items-center gap-4 mt-4">
-          {/* Crack Time */}
-          <div
-            className={`flex-1 p-3 rounded-lg ${
-              highContrast
-                ? 'bg-gray-800 border border-gray-600'
-                : 'bg-gray-50 border border-gray-200'
+        <div
+          className={`mt-4 p-3 rounded-lg ${
+            highContrast
+              ? 'bg-gray-800 border border-gray-600'
+              : 'bg-gray-50 border border-gray-200'
+          }`}
+        >
+          <p
+            className={`${mutedClasses} ${
+              presenterMode ? 'text-sm' : 'text-xs'
             }`}
           >
-            <p
-              className={`${mutedClasses} ${
-                presenterMode ? 'text-sm' : 'text-xs'
-              }`}
-            >
-              Estimated crack time
-            </p>
-            <p
-              className={`font-mono font-bold ${textClasses} ${
-                presenterMode ? 'text-presenter-sm' : 'text-sm'
-              }`}
-            >
-              {result.crackTimeCategory}
-            </p>
-          </div>
-
-          {/* Patterns Detected */}
-          <div
-            className={`flex-1 p-3 rounded-lg ${
-              result.patterns.length > 0
-                ? highContrast
-                  ? 'bg-red-900/50 border border-red-600'
-                  : 'bg-red-50 border border-red-200'
-                : highContrast
-                  ? 'bg-green-900/50 border border-green-600'
-                  : 'bg-green-50 border border-green-200'
+            Estimated crack time
+          </p>
+          <p
+            className={`font-mono font-bold ${textClasses} ${
+              presenterMode ? 'text-presenter-sm' : 'text-sm'
             }`}
           >
-            <p
-              className={`${mutedClasses} ${
-                presenterMode ? 'text-sm' : 'text-xs'
-              }`}
-            >
-              Patterns detected
-            </p>
-            <p
-              className={`font-bold ${
-                result.patterns.length > 0
-                  ? highContrast
-                    ? 'text-red-400'
-                    : 'text-red-600'
-                  : highContrast
-                    ? 'text-green-400'
-                    : 'text-green-600'
-              } ${presenterMode ? 'text-presenter-sm' : 'text-sm'}`}
-            >
-              {result.patterns.length > 0
-                ? `⚠️ ${result.patterns.length} ${result.patterns.length === 1 ? 'issue' : 'issues'}`
-                : '✓ None found'}
-            </p>
-          </div>
+            {result.crackTimeCategory}
+          </p>
         </div>
       )}
     </div>
