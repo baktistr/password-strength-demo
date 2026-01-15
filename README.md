@@ -57,7 +57,7 @@ vercel
 
 ## Scoring Algorithm
 
-The password strength scoring methodology is inspired by research from [CMU CyLab's Password Research Group](https://www.cylab.cmu.edu/research/passwords/index.html), which has conducted extensive studies on password security and user behavior.
+The password strength scoring methodology is inspired by research from the [CUPS Lab Password Meter](https://github.com/cupslab/password_meter), a data-driven password meter developed by researchers at Carnegie Mellon University and the University of Chicago.
 
 The score is calculated based on:
 
@@ -103,8 +103,9 @@ MIT - Use freely for educational purposes.
 
 ## Credits
 
-- Scoring methodology inspired by [CMU CyLab Password Research](https://www.cylab.cmu.edu/research/passwords/index.html)
-- Password strength concepts based on [CyLab Password Meter](https://github.com/AceTheSecutor/Password-Strength-Research)
+- Scoring methodology inspired by [CUPS Lab Password Meter](https://github.com/cupslab/password_meter)
+- Research paper: Ur et al. "Design and Evaluation of a Data-Driven Password Meter" ([CHI 2017](https://dl.acm.org/citation.cfm?id=3026050))
+- CUPS Lab contributors: Felicia Alfieri, Maung Aung, Lujo Bauer, Nicolas Christin, Jessica Colnago, Lorrie Faith Cranor, Henry Dixon, Pardis Emami Naeini, Hana Habib, Noah Johnson, William Melicher, Michael Stroucken, Josh Tan, and Blase Ur (Carnegie Mellon University & University of Chicago)
 
 ## Contributing
 
