@@ -76,8 +76,8 @@ export const SAMPLE_PASSWORDS = [
   // OK (40-59): 10-11 chars with variety
   { label: '🟡 OK: "BlueSky#42"', value: 'BlueSky#42', category: 'ok' },
   
-  // Strong (60-79): 14+ chars
-  { label: '🟢 Strong: "PurpleTiger$20"', value: 'PurpleTiger$20', category: 'strong' },
+  // Strong (60-79): 15+ chars with variety
+  { label: '🟢 Strong: "Jazz&Blues#247!"', value: 'Jazz&Blues#247!', category: 'strong' },
   
   // Very Strong (80+): 20+ chars with all character types
   { label: '💪 Very Strong: "Correct-Horse-Battery#9"', value: 'Correct-Horse-Battery#9', category: 'very-strong' },
@@ -303,12 +303,12 @@ export const CHALLENGE_PASSWORDS_POOL = [
   },
   {
     password: 'P@ssw0rd!',
-    score: 0,
+    score: 3,
     explanation: 'Leet speak (@ for a, 0 for o) is well-known to attackers.',
   },
   {
     password: 'Summer2026!',
-    score: 5,
+    score: 0,
     explanation: 'Season+Year pattern is extremely common and guessable.',
   },
   {
@@ -320,13 +320,13 @@ export const CHALLENGE_PASSWORDS_POOL = [
   // === WEAK (20-39) - Short or patterned ===
   {
     password: 'Kitty42!',
-    score: 30,
-    explanation: '8 chars with variety, but too short for modern security.',
+    score: 23,
+    explanation: '8 chars with variety, but too short and contains pet name.',
   },
   {
     password: 'Hello123!',
-    score: 33,
-    explanation: '9 chars is better, but still below recommended 12+ minimum.',
+    score: 3,
+    explanation: 'Contains common password pattern "hello123". Heavily penalized.',
   },
 
   // === OK (40-59) - Decent length, some issues ===
@@ -337,8 +337,8 @@ export const CHALLENGE_PASSWORDS_POOL = [
   },
   {
     password: 'Pizza!Moon#Star7',
-    score: 53,
-    explanation: '16 chars but detected patterns reduce score slightly.',
+    score: 63,
+    explanation: '16 chars with good variety. Solid password!',
   },
   {
     password: 'xK9mL2pQ7nR4',
@@ -348,9 +348,9 @@ export const CHALLENGE_PASSWORDS_POOL = [
 
   // === STRONG (60-79) - Good length and variety ===
   {
-    password: 'PurpleTiger$20',
-    score: 64,
-    explanation: '14 chars with all character types. Solid password!',
+    password: 'Jazz&Blues#247!',
+    score: 75,
+    explanation: '15 chars with symbols, numbers. No dictionary words!',
   },
   {
     password: 'Coffee&Cake22',
@@ -358,9 +358,9 @@ export const CHALLENGE_PASSWORDS_POOL = [
     explanation: '13 chars with symbols. Length helps even with simple words.',
   },
   {
-    password: 'My3Dogs&2CatsRunFast!',
-    score: 74,
-    explanation: '21 chars, memorable sentence. Numbers in middle helps!',
+    password: 'R2D2&C3PO#Rule!',
+    score: 75,
+    explanation: '15 chars with pop culture reference. Creative and strong!',
   },
   {
     password: 'jumping-frogs-swim',
@@ -368,26 +368,41 @@ export const CHALLENGE_PASSWORDS_POOL = [
     explanation: '18-char passphrase. Easy to remember, hard to crack.',
   },
   {
+    password: '2Fast&2Furious!',
+    score: 74,
+    explanation: '15 chars with numbers in middle. Movie reference works!',
+  },
+  {
     password: 'Tr0ub4dor&3Horse',
-    score: 78,
+    score: 68,
     explanation: '16 mixed chars. Good variety and length combination.',
   },
 
   // === VERY STRONG (80+) - Long passphrases with variety ===
   {
     password: 'Correct-Horse-Battery#9',
-    score: 98,
+    score: 88,
     explanation: '23 chars with uppercase, numbers, symbols. Excellent!',
   },
   {
-    password: 'Purple-Elephant-Dances#7',
-    score: 100,
-    explanation: '24-char passphrase with all character types. Perfect score!',
+    password: 'My3Dogs&2CatsRunFast!',
+    score: 94,
+    explanation: '21 chars, memorable sentence. Numbers in middle helps!',
   },
   {
     password: 'Green-Frog$Jumps-High#42',
-    score: 100,
+    score: 91,
     explanation: '24 chars, creative passphrase with variety. Outstanding!',
+  },
+  {
+    password: 'Kx7#Pm3@Qz9!Wy2&Jv5',
+    score: 85,
+    explanation: '19 random chars with all types. Maximum entropy!',
+  },
+  {
+    password: 'Rocket$Moon#Stars42!',
+    score: 77,
+    explanation: '20 chars with space theme. Creative and strong!',
   },
 ];
 
