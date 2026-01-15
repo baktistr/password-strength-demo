@@ -4,6 +4,7 @@
  */
 
 import { COMMON_PASSWORDS, KEYBOARD_PATTERNS, COMMON_WORDS, PET_NAMES, DICTIONARY_WORDS } from './constants';
+import { checkDictionaries, DictionaryMatch } from './dictionaries';
 
 export interface PatternMatch {
   type: string;
@@ -472,6 +473,41 @@ export function checkDigitPlacement(password: string): PatternMatch | null {
 }
 
 /**
+ * Check against expanded dictionaries (CUPS Lab methodology)
+ * Checks: common passwords, English words, names, phrases, pet names
+ */
+export function checkExpandedDictionaries(password: string): PatternMatch | null {
+  const matches = checkDictionaries(password);
+  
+  if (matches.length === 0) {
+    return null;
+  }
+  
+  // Find the most severe match (highest penalty)
+  const worstMatch = matches.reduce((worst, current) => 
+    current.penalty > worst.penalty ? current : worst
+  );
+  
+  // Map dictionary categories to user-friendly descriptions
+  const categoryDescriptions: Record<string, string> = {
+    'password': 'commonly used password',
+    'english': 'common English word',
+    'name': 'common name',
+    'phrase': 'common phrase',
+    'pet': 'common pet name'
+  };
+  
+  const categoryDesc = categoryDescriptions[worstMatch.category] || 'dictionary word';
+  
+  return {
+    type: `dictionary-${worstMatch.category}`,
+    description: `Contains "${worstMatch.word}" (${categoryDesc})`,
+    penalty: worstMatch.penalty,
+    matched: worstMatch.word,
+  };
+}
+
+/**
  * Get all pattern matches for a password
  */
 export function analyzePatterns(password: string): PatternMatch[] {
@@ -480,6 +516,7 @@ export function analyzePatterns(password: string): PatternMatch[] {
   const checks = [
     checkCommonPassword,
     checkDictionaryWord,
+    checkExpandedDictionaries, // CUPS Lab methodology - expanded dictionaries
     checkSequentialChars,
     checkRepeatedChars,
     checkKeyboardPatterns,

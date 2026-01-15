@@ -24,6 +24,12 @@ export interface StrengthResult {
   crackTimeCategory: string;
   suggestions: string[];
   betterChoice?: string; // Suggested improved password
+  breachCheck?: {
+    isBreached: boolean;
+    count: number;
+    loading?: boolean;
+    error?: string;
+  };
 }
 
 /**

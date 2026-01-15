@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import PasswordInput from './PasswordInput';
 import StrengthBar from './StrengthBar';
 import Checklist from './Checklist';
@@ -8,6 +8,7 @@ import Tips from './Tips';
 import PassphraseMode from './PassphraseMode';
 import Modal from './Modal';
 import { calculateStrength } from '@/utils/scoring';
+import { checkPasswordBreach, formatBreachCount, BreachResult } from '@/utils/hibp';
 
 interface PasswordMeterCompactProps {
   presenterMode: boolean;
@@ -27,9 +28,28 @@ export default function PasswordMeterCompact({
   const [showChecklist, setShowChecklist] = useState(false);
   const [showTips, setShowTips] = useState(false);
   const [showPatterns, setShowPatterns] = useState(false);
+  const [breachResult, setBreachResult] = useState<BreachResult>({ isBreached: false, count: 0 });
+  const [breachLoading, setBreachLoading] = useState(false);
 
   // Calculate strength whenever password changes
   const strengthResult = useMemo(() => calculateStrength(password), [password]);
+
+  // Check HIBP breach status (debounced)
+  useEffect(() => {
+    if (!password || password.length < 4) {
+      setBreachResult({ isBreached: false, count: 0 });
+      return;
+    }
+
+    setBreachLoading(true);
+    const timeoutId = setTimeout(async () => {
+      const result = await checkPasswordBreach(password);
+      setBreachResult(result);
+      setBreachLoading(false);
+    }, 500); // Debounce 500ms
+
+    return () => clearTimeout(timeoutId);
+  }, [password]);
 
   const textClasses = highContrast ? 'text-white' : 'text-gray-900';
   const mutedClasses = highContrast ? 'text-gray-300' : 'text-gray-600';
@@ -105,6 +125,51 @@ export default function PasswordMeterCompact({
           <span className={mutedClasses}> checks</span>
         </div>
       </div>
+
+      {/* Breach Status Alert */}
+      {hasPasswordEntered && (
+        <div
+          className={`p-3 rounded-lg flex items-center gap-3 ${
+            breachLoading
+              ? highContrast
+                ? 'bg-gray-800 border border-gray-600'
+                : 'bg-gray-50 border border-gray-200'
+              : breachResult.isBreached
+                ? highContrast
+                  ? 'bg-red-900/50 border border-red-500'
+                  : 'bg-red-50 border border-red-200'
+                : highContrast
+                  ? 'bg-green-900/50 border border-green-500'
+                  : 'bg-green-50 border border-green-200'
+          }`}
+        >
+          <span className={presenterMode ? 'text-xl' : 'text-lg'}>
+            {breachLoading ? '🔍' : breachResult.isBreached ? '⚠️' : '✓'}
+          </span>
+          <div className="flex-1">
+            <p className={`font-medium ${
+              breachLoading
+                ? highContrast ? 'text-gray-300' : 'text-gray-600'
+                : breachResult.isBreached
+                  ? highContrast ? 'text-red-400' : 'text-red-700'
+                  : highContrast ? 'text-green-400' : 'text-green-700'
+            } ${presenterMode ? 'text-presenter-sm' : 'text-sm'}`}>
+              {breachLoading
+                ? 'Checking data breaches...'
+                : breachResult.isBreached
+                  ? `Found in ${formatBreachCount(breachResult.count)} data breaches!`
+                  : 'Not found in known data breaches'}
+            </p>
+            <p className={`${highContrast ? 'text-gray-400' : 'text-gray-500'} ${presenterMode ? 'text-sm' : 'text-xs'}`}>
+              {breachLoading
+                ? 'Using Have I Been Pwned API'
+                : breachResult.isBreached
+                  ? 'This password has been exposed. Choose a different one!'
+                  : 'Checked via Have I Been Pwned (k-anonymity)'}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Action Buttons Row - Checklist, Tips, Patterns */}
       <div className="flex gap-3">
