@@ -127,6 +127,7 @@ export default function PasswordMeter({
             result={strengthResult}
             presenterMode={presenterMode}
             highContrast={highContrast}
+            onUseSuggestion={setPassword}
           />
         </section>
       </div>

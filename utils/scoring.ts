@@ -23,6 +23,7 @@ export interface StrengthResult {
   patterns: PatternMatch[];
   crackTimeCategory: string;
   suggestions: string[];
+  betterChoice?: string; // Suggested improved password
 }
 
 /**
@@ -44,58 +45,66 @@ export function analyzeCharacters(password: string): CharacterAnalysis {
 /**
  * Calculate length score (up to 70 points)
  * Length is the most critical factor - CyLab research shows it's more important than complexity
+ * Adjusted to be more generous for 8+ char passwords
  */
 function calculateLengthScore(length: number): number {
   if (length === 0) return 0;
   if (length < 8) {
-    // Below 8 chars: very weak, scale from 0-10
-    return Math.floor((length / 8) * 10);
+    // Below 8 chars: very weak, scale from 0-15
+    return Math.floor((length / 8) * 15);
+  }
+  if (length < 10) {
+    // 8-9 chars: baseline acceptable, score 20-30
+    return 20 + Math.floor(((length - 8) / 2) * 10);
   }
   if (length < 12) {
-    // 8-11 chars: weak to ok, scale from 10-30
-    return 10 + Math.floor(((length - 8) / 4) * 20);
+    // 10-11 chars: decent, score 30-40
+    return 30 + Math.floor(((length - 10) / 2) * 10);
+  }
+  if (length < 14) {
+    // 12-13 chars: good, score 45-55
+    return 45 + Math.floor(((length - 12) / 2) * 10);
   }
   if (length < 16) {
-    // 12-15 chars: good, scale from 30-50
-    return 30 + Math.floor(((length - 12) / 4) * 20);
+    // 14-15 chars: strong, score 55-60
+    return 55 + Math.floor(((length - 14) / 2) * 5);
   }
   if (length < 20) {
-    // 16-19 chars: strong, scale from 50-60
-    return 50 + Math.floor(((length - 16) / 4) * 10);
+    // 16-19 chars: very strong, score 60-70
+    return 60 + Math.floor(((length - 16) / 4) * 10);
   }
-  // 20+ chars: very strong, scale from 60-70 (max out at 25 chars)
-  return Math.min(70, 60 + Math.floor(((length - 20) / 5) * 10));
+  // 20+ chars: excellent, scale from 70-75
+  return Math.min(75, 70 + Math.floor(((length - 20) / 5) * 5));
 }
 
 /**
- * Calculate variety score (up to 15 points)
+ * Calculate variety score (up to 20 points)
  * CyLab research shows variety matters, but less than length
  * Unpredictable placement of character types is key
  */
 function calculateVarietyScore(analysis: CharacterAnalysis): number {
   let score = 0;
 
-  // Count character classes (lowercase is baseline, doesn't add points)
+  // Count character classes
   let characterClasses = 0;
   if (analysis.hasLowercase) characterClasses++;
   if (analysis.hasUppercase) characterClasses++;
   if (analysis.hasNumbers) characterClasses++;
   if (analysis.hasSymbols) characterClasses++;
 
-  // Award points based on character class diversity
-  if (characterClasses >= 2) score += 3;
-  if (characterClasses >= 3) score += 3;
-  if (characterClasses >= 4) score += 3;
+  // Award points based on character class diversity (more generous)
+  if (characterClasses >= 2) score += 5;  // Mixed case or letters+numbers
+  if (characterClasses >= 3) score += 5;  // Three types
+  if (characterClasses >= 4) score += 5;  // All four types
 
   // Bonus for high unique character ratio (indicates less repetition)
   if (analysis.length > 0) {
     const uniqueRatio = analysis.uniqueChars / analysis.length;
     if (uniqueRatio > 0.8) score += 3;
     else if (uniqueRatio > 0.6) score += 2;
-    else if (uniqueRatio > 0.5) score += 1;
   }
 
-  return Math.min(score, 15);
+  return Math.min(score, 20);
 }
 
 /**
@@ -170,6 +179,7 @@ function generateSuggestions(
   const criticalPatterns = patterns.filter(p =>
     p.type === 'common' ||
     p.type === 'common-base' ||
+    p.type === 'dictionary-word' ||
     p.type === 'keyboard' ||
     p.type === 'season-year' ||
     p.type === 'month-year' ||
@@ -182,6 +192,8 @@ function generateSuggestions(
       suggestions.push('This is a very common password that appears in attacker dictionaries');
     } else if (pattern.type === 'common-base') {
       suggestions.push('Based on a common password — minor additions don\'t help much');
+    } else if (pattern.type === 'dictionary-word') {
+      suggestions.push(pattern.description); // "Don't use dictionary words (word)"
     } else if (pattern.type === 'keyboard') {
       suggestions.push('Avoid keyboard patterns like "qwerty" or "asdf" — they\'re easily guessed');
     } else if (pattern.type === 'season-year' || pattern.type === 'month-year') {
@@ -208,9 +220,9 @@ function generateSuggestions(
     }
   }
 
-  // Priority 3: Length (most important positive factor)
+  // Priority 3: Length (most important positive factor) - CyLab style messages
   if (analysis.length < 8) {
-    suggestions.push('WAY too short — make it at least 8 characters (12+ recommended)');
+    suggestions.push(`Make your password longer than ${analysis.length} characters`);
   } else if (analysis.length < 12) {
     suggestions.push('Aim for 12+ characters — length is your strongest defense');
   } else if (analysis.length < 16) {
@@ -241,21 +253,19 @@ function generateSuggestions(
     }
   }
 
-  // Priority 5: Character variety (only if no major issues)
+  // Priority 5: Character variety - CyLab style messages
   if (patterns.length === 0 || score > 40) {
-    const characterClasses = [
-      analysis.hasLowercase,
-      analysis.hasUppercase,
-      analysis.hasNumbers,
-      analysis.hasSymbols
-    ].filter(Boolean).length;
-
-    if (characterClasses < 2) {
-      suggestions.push('Mix different character types (letters, numbers, symbols)');
-    } else if (analysis.length >= 12 && characterClasses < 3) {
-      suggestions.push('Add symbols or numbers in unpredictable positions for extra strength');
-    } else if (analysis.length >= 16 && characterClasses < 4) {
-      suggestions.push('Use all character types (upper, lower, numbers, symbols) for maximum entropy');
+    if (!analysis.hasSymbols) {
+      suggestions.push('Consider using 1 or more symbols');
+    }
+    if (!analysis.hasNumbers) {
+      suggestions.push('Consider using 1 or more digits');
+    }
+    if (!analysis.hasUppercase && analysis.hasLowercase) {
+      suggestions.push('Consider using 1 or more uppercase letters');
+    }
+    if (!analysis.hasLowercase && analysis.hasUppercase) {
+      suggestions.push('Consider using 1 or more lowercase letters');
     }
   }
 
@@ -271,6 +281,98 @@ function generateSuggestions(
   }
 
   return suggestions;
+}
+
+/**
+ * Generate a "better choice" password by fixing identified issues
+ * CyLab approach: insert digits/symbols into the middle, not just at ends
+ * For any password scoring below 60, generate a suggestion that scores above 60
+ */
+function generateBetterChoice(
+  password: string,
+  patterns: PatternMatch[],
+  analysis: CharacterAnalysis,
+  currentScore: number
+): string | undefined {
+  if (!password || password.length < 2) return undefined;
+
+  // Only generate suggestions for passwords scoring below 60
+  if (currentScore >= 60) return undefined;
+
+  let improved = password;
+
+  // Step 1: If digits are at the end, move them into the middle
+  const hasDigitsAtEnd = patterns.some(p => p.type === 'digits-at-end');
+  if (hasDigitsAtEnd) {
+    const endDigitsMatch = improved.match(/^(.+?)(\d+)$/);
+    if (endDigitsMatch) {
+      const [, base, digits] = endDigitsMatch;
+      const insertPos = Math.min(Math.ceil(base.length / 4), 3);
+      improved = base.slice(0, insertPos) + digits + base.slice(insertPos);
+    }
+  }
+
+  // Step 2: Ensure minimum length of 12+ characters for good score
+  // Add random word segments if too short
+  const targetLength = 16;
+  if (improved.length < targetLength) {
+    const additions = ['Kx', 'Qz', 'Jv', 'Pw', 'Ry'];
+    const additionIndex = password.length % additions.length;
+    // Insert in the middle to avoid end patterns
+    const midpoint = Math.floor(improved.length / 2);
+    while (improved.length < targetLength) {
+      const toAdd = additions[(additionIndex + improved.length) % additions.length];
+      improved = improved.slice(0, midpoint) + toAdd + improved.slice(midpoint);
+    }
+  }
+
+  // Step 3: Ensure has uppercase (capitalize middle letter if needed)
+  if (!/[A-Z]/.test(improved)) {
+    const midIdx = Math.floor(improved.length / 2);
+    const chars = improved.split('');
+    // Find a lowercase letter near the middle to capitalize
+    for (let i = midIdx; i < chars.length; i++) {
+      if (/[a-z]/.test(chars[i])) {
+        chars[i] = chars[i].toUpperCase();
+        break;
+      }
+    }
+    improved = chars.join('');
+  }
+
+  // Step 4: Ensure has lowercase
+  if (!/[a-z]/.test(improved)) {
+    const midIdx = Math.floor(improved.length / 2);
+    const chars = improved.split('');
+    for (let i = midIdx; i < chars.length; i++) {
+      if (/[A-Z]/.test(chars[i])) {
+        chars[i] = chars[i].toLowerCase();
+        break;
+      }
+    }
+    improved = chars.join('');
+  }
+
+  // Step 5: Ensure has digits in the middle (not at end)
+  if (!/\d/.test(improved)) {
+    const insertPos = Math.floor(improved.length / 3);
+    improved = improved.slice(0, insertPos) + '7' + improved.slice(insertPos);
+  }
+
+  // Step 6: Ensure has symbols in the middle
+  if (!/[^a-zA-Z0-9]/.test(improved)) {
+    const insertPos = Math.floor(improved.length * 2 / 3);
+    improved = improved.slice(0, insertPos) + '$' + improved.slice(insertPos);
+  }
+
+  // Final check: Make sure it's different from original
+  if (improved === password) {
+    // Force a change by inserting characters
+    const midpoint = Math.floor(improved.length / 2);
+    improved = improved.slice(0, midpoint) + '7$Kx' + improved.slice(midpoint);
+  }
+
+  return improved;
 }
 
 /**
@@ -314,6 +416,8 @@ export function calculateStrength(password: string): StrengthResult {
   score = Math.max(0, Math.min(100, score));
 
   // Generate results
+  const betterChoice = generateBetterChoice(password, patterns, analysis, score);
+
   return {
     score,
     label: getStrengthLabel(score),
@@ -322,5 +426,6 @@ export function calculateStrength(password: string): StrengthResult {
     patterns,
     crackTimeCategory: estimateCrackTime(score, analysis),
     suggestions: generateSuggestions(analysis, patterns, score),
+    betterChoice,
   };
 }

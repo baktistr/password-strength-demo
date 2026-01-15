@@ -3,12 +3,14 @@
  * Identifies common weak patterns in passwords.
  */
 
-import { COMMON_PASSWORDS, KEYBOARD_PATTERNS, COMMON_WORDS } from './constants';
+import { COMMON_PASSWORDS, KEYBOARD_PATTERNS, COMMON_WORDS, PET_NAMES, DICTIONARY_WORDS } from './constants';
 
 export interface PatternMatch {
   type: string;
   description: string;
   penalty: number;
+  matched?: string; // The actual matched substring
+  originalWord?: string; // Original word before transformation (e.g., "mydogs" -> "MyDog$")
 }
 
 /**
@@ -61,20 +63,20 @@ export function checkSequentialChars(password: string): PatternMatch | null {
     }
   }
 
-  if (sequentialCount >= 3) {
+  if (sequentialCount >= 4) {
     return {
       type: 'sequential',
       description: 'Contains multiple sequential characters (like 123 or abc)',
-      penalty: 15,
+      penalty: 10,
     };
-  } else if (sequentialCount >= 1) {
+  } else if (sequentialCount >= 2) {
     return {
       type: 'sequential-minor',
       description: 'Contains sequential characters',
-      penalty: 5,
+      penalty: 3,
     };
   }
-
+  // Don't penalize single short sequences like "123" - very common
   return null;
 }
 
@@ -178,13 +180,13 @@ export function checkYearPatterns(password: string): PatternMatch | null {
       return {
         type: 'year-recent',
         description: 'Contains a recent year (commonly used in passwords)',
-        penalty: 15,
+        penalty: 8,
       };
     }
     return {
       type: 'year',
       description: 'Contains a year pattern',
-      penalty: 10,
+      penalty: 5,
     };
   }
 
@@ -246,7 +248,7 @@ export function checkLeetSpeak(password: string): PatternMatch | null {
     return {
       type: 'leet',
       description: 'Uses common letter substitutions (like @ for a) that attackers know',
-      penalty: 40, // Major penalty - still dictionary-based
+      penalty: 25, // Significant penalty - still dictionary-based
     };
   }
 
@@ -256,7 +258,7 @@ export function checkLeetSpeak(password: string): PatternMatch | null {
       return {
         type: 'leet-word',
         description: 'Contains a common word with substitutions',
-        penalty: 25, // Significant penalty - dictionary word detected
+        penalty: 10, // Minor penalty
       };
     }
   }
@@ -274,7 +276,7 @@ export function checkSeasonPattern(password: string): PatternMatch | null {
     return {
       type: 'season-year',
       description: 'Uses a Season+Year pattern that is very commonly guessed',
-      penalty: 25,
+      penalty: 15,
     };
   }
 
@@ -292,8 +294,178 @@ export function checkMonthPattern(password: string): PatternMatch | null {
     return {
       type: 'month-year',
       description: 'Uses a Month+Year pattern that is commonly guessed',
-      penalty: 20,
+      penalty: 12,
     };
+  }
+
+  return null;
+}
+
+/**
+ * Check for pet names in the password (CyLab research)
+ */
+export function checkPetNames(password: string): PatternMatch | null {
+  const lower = password.toLowerCase();
+
+  for (const petName of PET_NAMES) {
+    if (lower.includes(petName) && petName.length >= 3) {
+      return {
+        type: 'pet-name',
+        description: `Don't use pet names (${petName.charAt(0).toUpperCase() + petName.slice(1)}) in passwords`,
+        penalty: 8,
+        matched: petName,
+      };
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Check for dictionary words in the password (CyLab approach)
+ * Detects when password IS a dictionary word or contains one as the main component
+ */
+export function checkDictionaryWord(password: string): PatternMatch | null {
+  const lower = password.toLowerCase();
+  // Remove common suffixes/prefixes like numbers and symbols for checking
+  const stripped = lower.replace(/^[^a-z]+|[^a-z]+$/gi, '');
+
+  // Check if the password is exactly a dictionary word (only penalize if short)
+  if (DICTIONARY_WORDS.includes(stripped) && stripped.length >= 4) {
+    // Only penalize heavily if the word IS the password
+    if (stripped === lower || stripped.length >= lower.length - 2) {
+      return {
+        type: 'dictionary-word',
+        description: `Don't use dictionary words (${stripped})`,
+        penalty: 15,
+        matched: stripped,
+      };
+    }
+  }
+
+  // Check if password is a dictionary word with minor additions (1-3 chars)
+  for (const word of DICTIONARY_WORDS) {
+    if (word.length >= 5) {
+      // Password is essentially just the word with small additions
+      if (stripped === word ||
+          (stripped.startsWith(word) && stripped.length <= word.length + 3) ||
+          (stripped.endsWith(word) && stripped.length <= word.length + 3)) {
+        return {
+          type: 'dictionary-word',
+          description: `Don't use dictionary words (${word})`,
+          penalty: 25,
+          matched: word,
+        };
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Check for simple word transformations (e.g., "mydogs" -> "MyDog$")
+ * Detects when users take a phrase and apply predictable transformations:
+ * - Capitalization changes
+ * - Symbol substitutions ($=s, @=a, etc.)
+ * - Removing or adding letters
+ */
+export function checkWordTransformation(password: string): PatternMatch | null {
+  // Common transformation patterns
+  const symbolMap: { [key: string]: string } = {
+    '$': 's',
+    '@': 'a',
+    '!': 'i',
+    '1': 'i',
+    '0': 'o',
+    '3': 'e',
+    '4': 'a',
+    '5': 's',
+    '7': 't',
+  };
+
+  // Convert password to normalized form (lowercase, symbols to letters)
+  let normalized = password.toLowerCase();
+  for (const [symbol, letter] of Object.entries(symbolMap)) {
+    normalized = normalized.split(symbol).join(letter);
+  }
+
+  // Common phrase patterns like "my<pet>", "my<thing>s", "i<verb><noun>"
+  const phrasePatterns = [
+    /my\s*(\w+)s?/i,  // "my dog", "mydogs", "my cats"
+    /i\s*love\s*(\w+)/i,  // "i love pizza"
+    /(\w+)\s*is\s*(\w+)/i,  // "life is good"
+  ];
+
+  for (const pattern of phrasePatterns) {
+    const match = normalized.match(pattern);
+    if (match) {
+      // Check if the original password has symbol substitutions or case changes
+      const hasSymbolSubs = /[$@!013457]/.test(password);
+      const hasMixedCase = /[a-z]/.test(password) && /[A-Z]/.test(password);
+
+      if (hasSymbolSubs || hasMixedCase) {
+        // Find what transformation was applied
+        const originalPhrase = match[0];
+        return {
+          type: 'word-transformation',
+          description: `Simple transformations of words or phrases (${originalPhrase} → ${password.replace(/[0-9]+$/, '')}) are predictable`,
+          penalty: 20,
+          matched: password,
+          originalWord: originalPhrase,
+        };
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Check for common password substrings (e.g., "fluffy" within a larger password)
+ */
+export function checkCommonSubstring(password: string): PatternMatch | null {
+  const lower = password.toLowerCase();
+
+  // Check for common passwords used as substrings (but not the whole password)
+  for (const common of [...COMMON_PASSWORDS, ...COMMON_WORDS]) {
+    if (common.length >= 4 && lower.includes(common) && lower !== common) {
+      // Don't double-report if it's already caught as common-base
+      if (!lower.startsWith(common)) {
+        return {
+          type: 'common-substring',
+          description: `Avoid using very common passwords like "${common}" as part of your own password`,
+          penalty: 15,
+          matched: common,
+        };
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Check for digits only at the end (CyLab research shows this is a weak pattern)
+ */
+export function checkDigitPlacement(password: string): PatternMatch | null {
+  // Check if password has digits
+  const hasDigits = /\d/.test(password);
+  if (!hasDigits) return null;
+
+  // Check if all digits are at the end
+  const endDigitsMatch = password.match(/^([^\d]*?)(\d+)$/);
+  if (endDigitsMatch && endDigitsMatch[1].length > 0) {
+    const digits = endDigitsMatch[2];
+    // Only flag if there are many trailing digits (4+)
+    if (digits.length >= 4) {
+      return {
+        type: 'digits-at-end',
+        description: 'Consider inserting digits into the middle, not just at the end',
+        penalty: 5,
+        matched: digits,
+      };
+    }
   }
 
   return null;
@@ -307,6 +479,7 @@ export function analyzePatterns(password: string): PatternMatch[] {
 
   const checks = [
     checkCommonPassword,
+    checkDictionaryWord,
     checkSequentialChars,
     checkRepeatedChars,
     checkKeyboardPatterns,
@@ -315,6 +488,10 @@ export function analyzePatterns(password: string): PatternMatch[] {
     checkLeetSpeak,
     checkSeasonPattern,
     checkMonthPattern,
+    checkPetNames,
+    checkWordTransformation,
+    checkCommonSubstring,
+    checkDigitPlacement,
   ];
 
   for (const check of checks) {

@@ -65,17 +65,29 @@ export const COMMON_PASSWORDS: string[] = [
 ];
 
 // Sample passwords for demonstration (fictional, safe to display)
-// Sorted from weakest to strongest
+// One example per strength category - tested against scoring algorithm
 export const SAMPLE_PASSWORDS = [
-  { label: 'Very Weak: "password"', value: 'password' },
-  { label: 'Very Weak: "P@ssw0rd!"', value: 'P@ssw0rd!' },
-  { label: 'Very Weak: "Summer2026!"', value: 'Summer2026!' },
-  { label: 'Weak: "Hello123!"', value: 'Hello123!' },
-  { label: 'OK: "MyDog$Fluffy"', value: 'MyDog$Fluffy' },
-  { label: 'Strong: "MyDog$Fluffy99"', value: 'MyDog$Fluffy99' },
-  { label: 'Strong: "Tr0ub4dor&3Horse"', value: 'Tr0ub4dor&3Horse' },
-  { label: 'Very Strong: "purple-elephant-dancing-rain"', value: 'purple-elephant-dancing-rain' },
-  { label: 'Very Strong: "Blue7-Tiger$-Runs9-Fast!"', value: 'Blue7-Tiger$-Runs9-Fast!' },
+  // Very Weak (0-19): Common password with huge penalty
+  { label: '🔴 Very Weak: "password"', value: 'password', category: 'very-weak' },
+  
+  // Weak (20-39): Short password
+  { label: '🟠 Weak: "Kitty42!"', value: 'Kitty42!', category: 'weak' },
+  
+  // OK (40-59): 10-11 chars with variety
+  { label: '🟡 OK: "BlueSky#42"', value: 'BlueSky#42', category: 'ok' },
+  
+  // Strong (60-79): 14+ chars
+  { label: '🟢 Strong: "PurpleTiger$20"', value: 'PurpleTiger$20', category: 'strong' },
+  
+  // Very Strong (80+): 20+ chars with all character types
+  { label: '💪 Very Strong: "Correct-Horse-Battery#9"', value: 'Correct-Horse-Battery#9', category: 'very-strong' },
+  
+  // === EDGE CASES - Educational examples ===
+  { label: '⚠️ Edge: "aaaaaaaaaaaaaaaa" (16 repeated)', value: 'aaaaaaaaaaaaaaaa', category: 'edge' },
+  { label: '⚠️ Edge: "Aa1!Bb2@Cc3#" (all char types)', value: 'Aa1!Bb2@Cc3#', category: 'edge' },
+  { label: '⚠️ Edge: "qwertyuiopasdf" (keyboard)', value: 'qwertyuiopasdf', category: 'edge' },
+  { label: '⚠️ Edge: "P@ssw0rd!" (leet speak)', value: 'P@ssw0rd!', category: 'edge' },
+  { label: '⚠️ Edge: "Summer2026!" (season+year)', value: 'Summer2026!', category: 'edge' },
 ];
 
 // Keyboard patterns (rows and common walks)
@@ -124,6 +136,110 @@ export const COMMON_WORDS: string[] = [
   'super',
   'hello',
   'world',
+  'fluffy',
+];
+
+// English dictionary words (CyLab approach - common English words used in passwords)
+// Based on frequently used words that appear in password dictionaries
+export const DICTIONARY_WORDS: string[] = [
+  // Common nouns
+  'fireplace', 'computer', 'keyboard', 'password', 'security', 'internet',
+  'football', 'baseball', 'basketball', 'hockey', 'soccer', 'tennis',
+  'dragon', 'monkey', 'elephant', 'tiger', 'lion', 'bear', 'wolf',
+  'sunshine', 'rainbow', 'thunder', 'lightning', 'butterfly', 'flower',
+  'mountain', 'river', 'ocean', 'forest', 'garden', 'castle', 'house',
+  'coffee', 'cookie', 'chocolate', 'banana', 'orange', 'apple', 'pizza',
+  'summer', 'winter', 'spring', 'autumn', 'monday', 'friday', 'sunday',
+  'master', 'shadow', 'hunter', 'killer', 'warrior', 'princess', 'prince',
+  'secret', 'magic', 'wonder', 'mystery', 'fantasy', 'legend', 'hero',
+  'guitar', 'music', 'movie', 'video', 'photo', 'picture', 'camera',
+  'school', 'college', 'university', 'teacher', 'student', 'doctor',
+  'family', 'friend', 'brother', 'sister', 'mother', 'father', 'daughter',
+  // Common verbs
+  'love', 'hate', 'like', 'want', 'need', 'think', 'know', 'believe',
+  'running', 'walking', 'jumping', 'flying', 'swimming', 'dancing',
+  // Common adjectives
+  'happy', 'lucky', 'golden', 'silver', 'purple', 'blue', 'green', 'red',
+  'super', 'great', 'awesome', 'amazing', 'beautiful', 'pretty', 'lovely',
+  'strong', 'brave', 'smart', 'clever', 'funny', 'crazy', 'cool', 'hot',
+  // Pop culture & brands
+  'batman', 'superman', 'spiderman', 'ironman', 'captain', 'marvel',
+  'starwars', 'pokemon', 'minecraft', 'fortnite', 'nintendo', 'playstation',
+  'google', 'facebook', 'twitter', 'instagram', 'youtube', 'netflix',
+  // Common password bases
+  'admin', 'login', 'welcome', 'access', 'system', 'server', 'network',
+  'cheese', 'pepper', 'mustard', 'butter', 'chicken', 'burger', 'sandwich',
+  // Body parts & personal
+  'heart', 'angel', 'devil', 'spirit', 'soul', 'dream', 'night', 'moon',
+  // Technology
+  'email', 'phone', 'mobile', 'tablet', 'laptop', 'desktop', 'screen',
+  // Places
+  'london', 'paris', 'tokyo', 'berlin', 'mexico', 'canada', 'america',
+  // Sports teams & misc
+  'yankees', 'lakers', 'cowboys', 'patriots', 'eagles', 'giants', 'bears',
+  // More common words from breach dictionaries
+  'forever', 'always', 'never', 'nothing', 'something', 'everything',
+  'today', 'tomorrow', 'yesterday', 'morning', 'evening', 'midnight',
+  'birthday', 'christmas', 'halloween', 'valentine', 'thanksgiving',
+  'diamond', 'crystal', 'emerald', 'platinum', 'bronze', 'copper',
+  'thunder', 'storm', 'fire', 'water', 'earth', 'wind', 'space',
+  'vampire', 'zombie', 'ghost', 'witch', 'wizard', 'knight', 'queen', 'king',
+  'ninja', 'samurai', 'pirate', 'cowboy', 'sheriff', 'soldier', 'marine',
+  'rocket', 'planet', 'galaxy', 'universe', 'cosmos', 'star', 'alien',
+];
+
+// Common pet names (CyLab research shows these are frequently used)
+export const PET_NAMES: string[] = [
+  'fluffy',
+  'buddy',
+  'max',
+  'bella',
+  'charlie',
+  'lucy',
+  'cooper',
+  'daisy',
+  'rocky',
+  'molly',
+  'bailey',
+  'sadie',
+  'maggie',
+  'sophie',
+  'chloe',
+  'duke',
+  'tucker',
+  'bear',
+  'jack',
+  'coco',
+  'oliver',
+  'murphy',
+  'sam',
+  'oscar',
+  'teddy',
+  'winston',
+  'penny',
+  'harley',
+  'pepper',
+  'ginger',
+  'shadow',
+  'princess',
+  'bandit',
+  'zeus',
+  'sasha',
+  'lucky',
+  'rex',
+  'spot',
+  'fido',
+  'buster',
+  'milo',
+  'simba',
+  'tiger',
+  'kitty',
+  'mittens',
+  'whiskers',
+  'oreo',
+  'toby',
+  'bruno',
+  'max',
 ];
 
 // Scoring thresholds
@@ -162,91 +278,116 @@ export const PASSPHRASE_VERBS: string[] = [
 ];
 
 // Challenge game passwords pool - 4 random ones selected each round
+// Scores are actual values from the scoring algorithm
 export const CHALLENGE_PASSWORDS_POOL = [
-  // Very Weak (0-20)
+  // === VERY WEAK (0-19) - Common passwords, huge penalties ===
   {
     password: 'password',
-    score: 5,
-    explanation: 'One of the most common passwords. Attackers try this first.',
+    score: 0,
+    explanation: 'One of the most common passwords. Attackers try this first!',
   },
   {
-    password: 'P@ssw0rd!',
-    score: 12,
-    explanation: 'Common substitutions (@ for a, 0 for o) are well-known to attackers.',
+    password: 'qwerty',
+    score: 0,
+    explanation: 'Keyboard pattern - in every attacker\'s dictionary.',
   },
   {
     password: '123456789',
-    score: 8,
-    explanation: 'Simple number sequence. Cracked instantly.',
+    score: 0,
+    explanation: 'Simple number sequence. Cracked in milliseconds.',
   },
   {
-    password: 'qwerty123',
-    score: 10,
-    explanation: 'Keyboard pattern + numbers. Very predictable.',
+    password: 'letmein',
+    score: 0,
+    explanation: 'Classic common password. Never use it!',
   },
-  // Weak (20-40)
   {
-    password: 'Summer2024!',
-    score: 28,
-    explanation: 'Season + Year + Symbol pattern. Very commonly guessed.',
+    password: 'P@ssw0rd!',
+    score: 0,
+    explanation: 'Leet speak (@ for a, 0 for o) is well-known to attackers.',
+  },
+  {
+    password: 'Summer2026!',
+    score: 5,
+    explanation: 'Season+Year pattern is extremely common and guessable.',
+  },
+  {
+    password: 'MySecret#2024',
+    score: 0,
+    explanation: 'Contains \"secret\" - a common password word. Heavily penalized.',
+  },
+
+  // === WEAK (20-39) - Short or patterned ===
+  {
+    password: 'Kitty42!',
+    score: 30,
+    explanation: '8 chars with variety, but too short for modern security.',
   },
   {
     password: 'Hello123!',
-    score: 32,
-    explanation: 'Common word + numbers + symbol. Too short and predictable.',
+    score: 33,
+    explanation: '9 chars is better, but still below recommended 12+ minimum.',
   },
+
+  // === OK (40-59) - Decent length, some issues ===
   {
-    password: 'iloveyou99',
-    score: 25,
-    explanation: 'Common phrase with numbers. In most password dictionaries.',
-  },
-  // OK (40-60)
-  {
-    password: 'MyDog$Fluffy',
-    score: 52,
-    explanation: 'Personal but decent length. Would be stronger with more characters.',
-  },
-  {
-    password: 'Jk8$mN2#pL',
+    password: 'BlueSky#42',
     score: 48,
-    explanation: 'Good variety but only 10 characters. Length matters more.',
-  },
-  {
-    password: 'Coffee&Cake22',
-    score: 55,
-    explanation: 'Decent mix but could be longer for better security.',
-  },
-  // Strong (60-80)
-  {
-    password: 'MyDog$Fluffy99',
-    score: 68,
-    explanation: 'Good length and variety. A solid password choice.',
-  },
-  {
-    password: 'Tr0ub4dor&3Horse',
-    score: 72,
-    explanation: '16 characters with good variety. Strong password.',
+    explanation: '10 chars with good variety. Decent but could be longer.',
   },
   {
     password: 'Pizza!Moon#Star7',
-    score: 70,
-    explanation: 'Random words with symbols and numbers. Good strength.',
-  },
-  // Very Strong (80+)
-  {
-    password: 'correct-horse-battery-staple',
-    score: 92,
-    explanation: 'Long passphrase (28 chars). Length beats complexity!',
+    score: 53,
+    explanation: '16 chars but detected patterns reduce score slightly.',
   },
   {
-    password: 'purple-elephant-dancing-rain',
-    score: 95,
-    explanation: '4-word passphrase. Easy to remember, very hard to crack.',
+    password: 'xK9mL2pQ7nR4',
+    score: 58,
+    explanation: '12 random chars. Good variety, approaching strong territory.',
+  },
+
+  // === STRONG (60-79) - Good length and variety ===
+  {
+    password: 'PurpleTiger$20',
+    score: 64,
+    explanation: '14 chars with all character types. Solid password!',
   },
   {
-    password: 'Blue7-Tiger$-Runs9-Fast!',
+    password: 'Coffee&Cake22',
+    score: 67,
+    explanation: '13 chars with symbols. Length helps even with simple words.',
+  },
+  {
+    password: 'My3Dogs&2CatsRunFast!',
+    score: 74,
+    explanation: '21 chars, memorable sentence. Numbers in middle helps!',
+  },
+  {
+    password: 'jumping-frogs-swim',
+    score: 77,
+    explanation: '18-char passphrase. Easy to remember, hard to crack.',
+  },
+  {
+    password: 'Tr0ub4dor&3Horse',
+    score: 78,
+    explanation: '16 mixed chars. Good variety and length combination.',
+  },
+
+  // === VERY STRONG (80+) - Long passphrases with variety ===
+  {
+    password: 'Correct-Horse-Battery#9',
     score: 98,
-    explanation: 'Long passphrase with numbers and symbols. Excellent!',
+    explanation: '23 chars with uppercase, numbers, symbols. Excellent!',
+  },
+  {
+    password: 'Purple-Elephant-Dances#7',
+    score: 100,
+    explanation: '24-char passphrase with all character types. Perfect score!',
+  },
+  {
+    password: 'Green-Frog$Jumps-High#42',
+    score: 100,
+    explanation: '24 chars, creative passphrase with variety. Outstanding!',
   },
 ];
 

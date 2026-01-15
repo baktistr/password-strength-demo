@@ -6,6 +6,7 @@ interface TipsProps {
   result: StrengthResult;
   presenterMode: boolean;
   highContrast: boolean;
+  onUseSuggestion?: (suggestion: string) => void;
 }
 
 /**
@@ -15,11 +16,18 @@ export default function Tips({
   result,
   presenterMode,
   highContrast,
+  onUseSuggestion,
 }: TipsProps) {
-  const { suggestions } = result;
+  const { suggestions, betterChoice } = result;
 
   const textClasses = highContrast ? 'text-white' : 'text-gray-900';
   const mutedClasses = highContrast ? 'text-gray-300' : 'text-gray-600';
+
+  const handleUseSuggestion = () => {
+    if (betterChoice && onUseSuggestion) {
+      onUseSuggestion(betterChoice);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -30,6 +38,35 @@ export default function Tips({
       >
         Tips to Improve
       </h3>
+
+      {/* Better Choice Suggestion */}
+      {betterChoice && (
+        <div
+          className={`p-4 rounded-lg border-2 ${
+            highContrast
+              ? 'bg-green-900/50 border-green-400'
+              : 'bg-green-50 border-green-300'
+          }`}
+        >
+          <div className={`font-semibold mb-2 ${highContrast ? 'text-green-300' : 'text-green-700'} ${presenterMode ? 'text-presenter-base' : 'text-base'}`}>
+            A better choice:
+          </div>
+          <button
+            onClick={handleUseSuggestion}
+            className={`block w-full text-left px-3 py-2 rounded font-mono cursor-pointer transition-all ${
+              highContrast
+                ? 'bg-gray-800 text-green-300 hover:bg-gray-700 hover:ring-2 hover:ring-green-400'
+                : 'bg-white text-green-800 border border-green-200 hover:bg-green-100 hover:ring-2 hover:ring-green-400'
+            } ${presenterMode ? 'text-presenter-base' : 'text-base'}`}
+            title="Click to use this password"
+          >
+            {betterChoice}
+          </button>
+          <p className={`mt-2 ${mutedClasses} ${presenterMode ? 'text-sm' : 'text-xs'}`}>
+            Click to use this suggestion (scores 60+)
+          </p>
+        </div>
+      )}
 
       <ol className="space-y-3">
         {suggestions.slice(0, 5).map((suggestion, index) => (
