@@ -514,19 +514,14 @@ export function analyzePatterns(password: string): PatternMatch[] {
   const matches: PatternMatch[] = [];
 
   const checks = [
-    checkCommonPassword,
-    checkDictionaryWord,
-    checkExpandedDictionaries, // CUPS Lab methodology - expanded dictionaries
+    checkExpandedDictionaries, // CUPS Lab methodology - primary dictionary check
     checkSequentialChars,
     checkRepeatedChars,
     checkKeyboardPatterns,
     checkYearPatterns,
     checkDatePatterns,
-    checkLeetSpeak,
     checkSeasonPattern,
     checkMonthPattern,
-    checkPetNames,
-    checkWordTransformation,
     checkCommonSubstring,
     checkDigitPlacement,
   ];
