@@ -324,9 +324,39 @@ export const CHALLENGE_PASSWORDS_POOL = [
     explanation: '8 chars with variety, but too short and contains pet name.',
   },
   {
-    password: 'Hello123!',
-    score: 3,
-    explanation: 'Contains common password pattern "hello123". Heavily penalized.',
+    password: 'Max!2025',
+    score: 25,
+    explanation: '8 chars with variety, but contains common name "Max".',
+  },
+  {
+    password: 'Bear123!',
+    score: 23,
+    explanation: '8 chars - pet name "bear" reduces strength significantly.',
+  },
+  {
+    password: 'Fluffy!1',
+    score: 22,
+    explanation: '8 chars with pet name. Too short and predictable.',
+  },
+  {
+    password: 'Abc!@#12',
+    score: 38,
+    explanation: '8 chars with symbols, but sequential letters are weak.',
+  },
+  {
+    password: 'Star!123',
+    score: 38,
+    explanation: '8 chars - common word "star" and sequential numbers.',
+  },
+  {
+    password: 'Moon#42!',
+    score: 38,
+    explanation: '8 chars with variety, but common word "moon" detected.',
+  },
+  {
+    password: 'Sunset2024!',
+    score: 35,
+    explanation: '11 chars but year pattern (2024) is predictable.',
   },
 
   // === OK (40-59) - Decent length, some issues ===
@@ -336,9 +366,39 @@ export const CHALLENGE_PASSWORDS_POOL = [
     explanation: '10 chars with good variety. Decent but could be longer.',
   },
   {
-    password: 'Pizza!Moon#Star7',
-    score: 63,
-    explanation: '16 chars with good variety. Solid password!',
+    password: 'Ocean#Wave7',
+    score: 43,
+    explanation: '11 chars with variety. Dictionary words reduce score.',
+  },
+  {
+    password: 'Cloud9#Sky!',
+    score: 43,
+    explanation: '11 chars - common words detected but good variety.',
+  },
+  {
+    password: 'Zx9@Km4!Pq',
+    score: 48,
+    explanation: '10 random chars. No patterns, approaching strong.',
+  },
+  {
+    password: 'Nq5#Wr8!Yt',
+    score: 48,
+    explanation: '10 random chars with symbols. Good entropy!',
+  },
+  {
+    password: 'RedBlue#42!',
+    score: 53,
+    explanation: '11 chars with colors. Simple words but good length.',
+  },
+  {
+    password: 'Alpha#Beta9',
+    score: 53,
+    explanation: '11 chars with Greek letters. Creative approach!',
+  },
+  {
+    password: 'Gamma!Ray#4',
+    score: 52,
+    explanation: '11 chars with science theme. Good variety.',
   },
   {
     password: 'xK9mL2pQ7nR4',
