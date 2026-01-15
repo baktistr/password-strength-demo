@@ -57,14 +57,16 @@ vercel
 
 ## Scoring Algorithm
 
-The password strength score is calculated based on:
+The password strength scoring methodology is inspired by research from [CMU CyLab's Password Research Group](https://www.cylab.cmu.edu/research/passwords/index.html), which has conducted extensive studies on password security and user behavior.
+
+The score is calculated based on:
 
 | Factor | Weight |
 |--------|--------|
-| Length (most important) | Up to 60 points |
+| Length (most important) | Up to 75 points |
 | Character variety | Up to 20 points |
-| Passphrase bonus | Up to 20 points |
-| Pattern penalties | -5 to -50 points |
+| Passphrase bonus | Up to 15 points |
+| Pattern penalties | -5 to -70 points |
 
 ### Length Thresholds
 - 8+ characters: Minimum
@@ -98,6 +100,11 @@ Use the "Audience Challenge" tab for an interactive ranking game:
 ## License
 
 MIT - Use freely for educational purposes.
+
+## Credits
+
+- Scoring methodology inspired by [CMU CyLab Password Research](https://www.cylab.cmu.edu/research/passwords/index.html)
+- Password strength concepts based on [CyLab Password Meter](https://github.com/AceTheSecutor/Password-Strength-Research)
 
 ## Contributing
 
