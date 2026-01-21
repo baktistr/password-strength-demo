@@ -53,7 +53,7 @@ export default function PresenterMode({
           aria-pressed={presenterMode}
           aria-label={presenterMode ? 'Disable presenter mode' : 'Enable presenter mode'}
         >
-          {presenterMode ? '[x] ' : '[ ] '}Big Text
+          Big Text
         </button>
 
         {/* High Contrast Toggle */}
@@ -63,7 +63,7 @@ export default function PresenterMode({
           aria-pressed={highContrast}
           aria-label={highContrast ? 'Disable high contrast' : 'Enable high contrast'}
         >
-          {highContrast ? '[x] ' : '[ ] '}High Contrast
+          High Contrast
         </button>
 
         {/* Fullscreen Toggle */}
