@@ -80,7 +80,7 @@ export const SAMPLE_PASSWORDS = [
   { label: '🟢 Strong: "Jazz&Blues#247!"', value: 'Jazz&Blues#247!', category: 'strong' },
   
   // Very Strong (80+): 20+ chars with all character types
-  { label: '💪 Very Strong: "Correct-Horse-Battery#9"', value: 'Correct-Horse-Battery#9', category: 'very-strong' },
+  { label: '💪 Very Strong: "Kx7#Pm3@Qz9!Wy2&Rv5"', value: 'Kx7#Pm3@Qz9!Wy2&Rv5', category: 'very-strong' },
 ];
 
 // Keyboard patterns (rows and common walks)
@@ -433,9 +433,9 @@ export const CHALLENGE_PASSWORDS_POOL = [
 
   // === VERY STRONG (80+) - Long passphrases with variety ===
   {
-    password: 'Correct-Horse-Battery#9',
-    score: 88,
-    explanation: '23 chars with uppercase, numbers, symbols. Excellent!',
+    password: 'Kx7#Pm3@Qz9!Wy2&Rv5',
+    score: 85,
+    explanation: '20 random chars with all types. No patterns detected!',
   },
   {
     password: 'My3Dogs&2CatsRunFast!',
