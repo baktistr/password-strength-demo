@@ -113,7 +113,7 @@ export default function PasswordMeterCompact({
       </section>
 
       {/* Quick Stats Row - only chars and checks */}
-      <div className={`flex items-center justify-center gap-8 py-2 ${presenterMode ? 'text-presenter-base' : 'text-base'}`}>
+      <div className={`flex items-center justify-center gap-4 sm:gap-8 py-2 ${presenterMode ? 'text-presenter-base' : 'text-base'}`}>
         <div className={`text-center ${textClasses}`}>
           <span className="font-bold text-2xl">{characterAnalysis.length}</span>
           <span className={mutedClasses}> chars</span>
@@ -143,8 +143,8 @@ export default function PasswordMeterCompact({
                   : 'bg-green-50 border border-green-200'
           }`}
         >
-          <span className={presenterMode ? 'text-xl' : 'text-lg'}>
-            {breachLoading ? '🔍' : breachResult.isBreached ? '⚠️' : '✓'}
+          <span className={`font-bold ${presenterMode ? 'text-xl' : 'text-lg'}`}>
+            {breachLoading ? '...' : breachResult.isBreached ? '!' : 'OK'}
           </span>
           <div className="flex-1">
             <p className={`font-medium ${
@@ -172,13 +172,12 @@ export default function PasswordMeterCompact({
       )}
 
       {/* Action Buttons Row - Checklist, Tips, Patterns */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
         <button
           onClick={() => setShowChecklist(true)}
           className={actionButtonClasses()}
           aria-haspopup="dialog"
         >
-          <span>📋</span>
           <span>Checklist</span>
           <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
             checksPass >= 5 
@@ -196,7 +195,6 @@ export default function PasswordMeterCompact({
           className={actionButtonClasses()}
           aria-haspopup="dialog"
         >
-          <span>💡</span>
           <span>Tips</span>
           {strengthResult.suggestions.length > 0 && (
             <span className="ml-1 px-2 py-0.5 rounded-full text-xs bg-blue-500/20 text-blue-400">
@@ -210,7 +208,6 @@ export default function PasswordMeterCompact({
           className={actionButtonClasses()}
           aria-haspopup="dialog"
         >
-          <span>🔍</span>
           <span>Patterns</span>
           <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
             patterns.length > 0
@@ -236,7 +233,7 @@ export default function PasswordMeterCompact({
         >
           <div className="flex items-center justify-between">
             <span className={`${presenterMode ? 'text-presenter-sm' : 'text-sm'} ${highContrast ? 'text-green-300' : 'text-green-700'}`}>
-              💡 Try this instead:
+              Try this instead:
             </span>
             <code className={`font-mono ${presenterMode ? 'text-presenter-sm' : 'text-sm'} ${highContrast ? 'text-green-400' : 'text-green-800'}`}>
               {strengthResult.betterChoice}
@@ -297,7 +294,7 @@ export default function PasswordMeterCompact({
               <p className={`font-medium ${
                 highContrast ? 'text-green-400' : 'text-green-700'
               } ${presenterMode ? 'text-presenter-sm' : 'text-base'}`}>
-                ✓ No weak patterns detected!
+                No weak patterns detected.
               </p>
               <p className={`mt-2 ${
                 highContrast ? 'text-gray-300' : 'text-gray-600'
@@ -322,7 +319,7 @@ export default function PasswordMeterCompact({
                     <p className={`font-medium ${
                       highContrast ? 'text-red-400' : 'text-red-700'
                     } ${presenterMode ? 'text-presenter-sm' : 'text-sm'}`}>
-                      ⚠️ {pattern.type.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                      {pattern.type.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                     </p>
                     <p className={`mt-1 ${
                       highContrast ? 'text-gray-300' : 'text-gray-600'

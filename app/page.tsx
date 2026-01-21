@@ -78,7 +78,7 @@ export default function Home() {
           } ${presenterMode ? 'text-sm' : 'text-xs'}`}
           role="alert"
         >
-          <strong>🔒 Privacy First:</strong> Runs entirely in your browser. No data sent anywhere.
+          <strong>Privacy First:</strong> Runs entirely in your browser. No data sent anywhere.
           <span className="ml-2 opacity-75">Don&apos;t use real passwords!</span>
         </div>
 
@@ -107,14 +107,12 @@ export default function Home() {
         )}
 
         {/* Tab Navigation - Compact */}
-        <div className="flex gap-2 mb-3 flex-shrink-0" role="tablist">
+        <div className="flex gap-2 mb-3 flex-shrink-0 w-full" role="tablist">
           <button
             role="tab"
             aria-selected={activeTab === 'meter'}
             onClick={() => setActiveTab('meter')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              presenterMode ? 'text-sm' : 'text-sm'
-            } ${
+            className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-medium transition-all text-sm ${
               activeTab === 'meter'
                 ? highContrast
                   ? 'bg-white text-black'
@@ -124,15 +122,13 @@ export default function Home() {
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            🔐 Password Meter
+            Password Meter
           </button>
           <button
             role="tab"
             aria-selected={activeTab === 'challenge'}
             onClick={() => setActiveTab('challenge')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              presenterMode ? 'text-sm' : 'text-sm'
-            } ${
+            className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-medium transition-all text-sm ${
               activeTab === 'challenge'
                 ? highContrast
                   ? 'bg-white text-black'
@@ -142,7 +138,7 @@ export default function Home() {
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            🎮 Challenge
+            Challenge
           </button>
         </div>
 

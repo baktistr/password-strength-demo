@@ -104,7 +104,7 @@ export default function PasswordInput({
       </div>
 
       {/* Sample Passwords and Passphrase Buttons */}
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
           <button
             type="button"
@@ -113,7 +113,7 @@ export default function PasswordInput({
             aria-expanded={showSamples}
             aria-haspopup="listbox"
           >
-            <span>📝 Sample passwords</span>
+            <span>Sample passwords</span>
             <span className={`transition-transform ${showSamples ? 'rotate-180' : ''}`}>
               ▼
             </span>
@@ -156,7 +156,6 @@ export default function PasswordInput({
             className={`${buttonClasses} flex items-center gap-2`}
             aria-haspopup="dialog"
           >
-            <span>🔤</span>
             <span>Passphrase</span>
           </button>
         )}

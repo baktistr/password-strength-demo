@@ -171,7 +171,7 @@ export default function ChallengeGame({
       </div>
 
       {/* Password cards */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
         {displayOrder.map((pw, index) => (
           <div
             key={`${roundKey}-${index}`}
@@ -289,7 +289,7 @@ export default function ChallengeGame({
               presenterMode ? 'text-presenter-lg' : 'text-xl'
             }`}
           >
-            🎯 Key Takeaway
+            Key Takeaway
           </h3>
           <p className={`${mutedClasses} ${presenterMode ? 'text-presenter-sm' : 'text-base'}`}>
             The winner is <strong className="font-mono">{strongestPassword.password}</strong> with

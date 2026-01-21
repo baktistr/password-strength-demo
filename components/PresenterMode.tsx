@@ -45,7 +45,7 @@ export default function PresenterMode({
           : 'bg-gray-100 border border-gray-200'
       }`}
     >
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         <span
           className={`font-medium ${
             highContrast ? 'text-white' : 'text-gray-700'

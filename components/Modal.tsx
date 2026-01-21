@@ -44,12 +44,12 @@ export default function Modal({
 
   if (!isOpen) return null;
 
-  const overlayClasses = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm';
-  
+  const overlayClasses = 'fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 backdrop-blur-sm';
+
   const modalClasses = `
-    relative w-full max-w-lg max-h-[80vh] overflow-auto rounded-xl shadow-2xl
+    relative w-full max-w-lg max-h-[90vh] sm:max-h-[80vh] overflow-auto rounded-xl shadow-2xl
     ${highContrast ? 'bg-gray-900 border-2 border-white' : 'bg-white border border-gray-200'}
-    ${presenterMode ? 'p-6' : 'p-5'}
+    ${presenterMode ? 'p-6' : 'p-4 sm:p-5'}
   `;
 
   const titleClasses = `
