@@ -71,14 +71,7 @@ export default function PasswordMeterCompact({
 
   // Count passed checks for quick summary
   const { characterAnalysis, patterns } = strengthResult;
-  // Only count "no patterns" as passing if there's actually a password entered
-  const hasPasswordEntered = characterAnalysis.length > 0;
-  // For very strong passwords (16+ chars), minor patterns are acceptable
-  const hasAcceptablePatterns = hasPasswordEntered && (
-    patterns.length === 0 || 
-    (characterAnalysis.length >= 16 && patterns.every(p => p.penalty <= 10))
-  );
-  
+
   const checksPass = [
     characterAnalysis.length >= 8,
     characterAnalysis.length >= 12,
@@ -86,9 +79,8 @@ export default function PasswordMeterCompact({
     characterAnalysis.hasUppercase,
     characterAnalysis.hasNumbers,
     characterAnalysis.hasSymbols,
-    hasAcceptablePatterns,
   ].filter(Boolean).length;
-  const totalChecks = 7;
+  const totalChecks = 6;
 
   return (
     <div className="space-y-6">

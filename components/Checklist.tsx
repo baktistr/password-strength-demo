@@ -98,22 +98,6 @@ export default function Checklist({
           </div>
         </div>
 
-        <div className={`${itemClasses} ${length >= LENGTH_SCORES.GREAT_LENGTH ? passClasses : failClasses}`}>
-          <CheckIcon pass={length >= LENGTH_SCORES.GREAT_LENGTH} />
-          <div>
-            <p className={textClasses}>
-              <strong>16+ characters</strong>
-              <span className={`ml-2 px-2 py-0.5 rounded text-xs font-medium
-                ${highContrast ? 'bg-purple-800 text-purple-100' : 'bg-purple-100 text-purple-800'}`}>
-                Excellent
-              </span>
-            </p>
-            <p className={`${mutedClasses} ${presenterMode ? 'text-sm' : 'text-xs'}`}>
-              Great for sensitive accounts like banking or email
-            </p>
-          </div>
-        </div>
-
         {/* Character variety - shown but de-emphasized */}
         <div
           className={`mt-4 p-3 rounded-lg ${
