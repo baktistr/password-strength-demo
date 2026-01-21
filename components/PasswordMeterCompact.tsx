@@ -71,6 +71,7 @@ export default function PasswordMeterCompact({
 
   // Count passed checks for quick summary
   const { characterAnalysis, patterns } = strengthResult;
+  const hasPasswordEntered = characterAnalysis.length > 0;
 
   const checksPass = [
     characterAnalysis.length >= 8,
