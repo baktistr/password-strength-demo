@@ -52,15 +52,18 @@ export default function PassphraseMode({
     // Helper to get random item from array
     const random = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
+    // Helper to capitalize first letter
+    const capitalize = (word: string): string => word.charAt(0).toUpperCase() + word.slice(1);
+
     for (let i = 0; i < wordCount; i++) {
       // Alternate between adjectives, nouns, and verbs for variety
       const wordType = i % 3;
       if (wordType === 0) {
-        words.push(random(PASSPHRASE_ADJECTIVES));
+        words.push(capitalize(random(PASSPHRASE_ADJECTIVES)));
       } else if (wordType === 1) {
-        words.push(random(PASSPHRASE_NOUNS));
+        words.push(capitalize(random(PASSPHRASE_NOUNS)));
       } else {
-        words.push(random(PASSPHRASE_VERBS));
+        words.push(capitalize(random(PASSPHRASE_VERBS)));
       }
     }
 
