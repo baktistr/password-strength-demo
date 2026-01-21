@@ -81,13 +81,6 @@ export const SAMPLE_PASSWORDS = [
   
   // Very Strong (80+): 20+ chars with all character types
   { label: '💪 Very Strong: "Correct-Horse-Battery#9"', value: 'Correct-Horse-Battery#9', category: 'very-strong' },
-  
-  // === EDGE CASES - Educational examples ===
-  { label: '⚠️ Edge: "aaaaaaaaaaaaaaaa" (16 repeated)', value: 'aaaaaaaaaaaaaaaa', category: 'edge' },
-  { label: '⚠️ Edge: "Aa1!Bb2@Cc3#" (all char types)', value: 'Aa1!Bb2@Cc3#', category: 'edge' },
-  { label: '⚠️ Edge: "qwertyuiopasdf" (keyboard)', value: 'qwertyuiopasdf', category: 'edge' },
-  { label: '⚠️ Edge: "P@ssw0rd!" (leet speak)', value: 'P@ssw0rd!', category: 'edge' },
-  { label: '⚠️ Edge: "Summer2026!" (season+year)', value: 'Summer2026!', category: 'edge' },
 ];
 
 // Keyboard patterns (rows and common walks)
